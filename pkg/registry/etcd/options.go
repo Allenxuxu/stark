@@ -6,7 +6,10 @@ import (
 	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
-type authKey struct{}
+type (
+	authKey   struct{}
+	prefixKey struct{}
+)
 
 type authCreds struct {
 	Username string
@@ -20,5 +23,14 @@ func Auth(username, password string) registry.Option {
 			o.Context = context.Background()
 		}
 		o.Context = context.WithValue(o.Context, authKey{}, &authCreds{Username: username, Password: password})
+	}
+}
+
+func Prefix(prefix string) registry.Option {
+	return func(o *registry.Options) {
+		if o.Context == nil {
+			o.Context = context.Background()
+		}
+		o.Context = context.WithValue(o.Context, prefixKey{}, prefix)
 	}
 }

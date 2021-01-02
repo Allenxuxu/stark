@@ -23,12 +23,13 @@ var (
 	DefaultAddr    = "127.0.0.1:2379"
 	DefaultTimeout = 5 * time.Second
 
-	prefix = "/stark/registry/"
+	defaultPrefix = "/stark/registry/"
 )
 
 type etcdRegistry struct {
 	client  *clientv3.Client
 	options registry.Options
+	prefix  string
 
 	sync.RWMutex
 	register map[string]uint64
@@ -38,17 +39,18 @@ type etcdRegistry struct {
 func NewRegistry(opts ...registry.Option) (registry.Registry, error) {
 	e := &etcdRegistry{
 		options:  registry.Options{},
+		prefix:   defaultPrefix,
 		register: make(map[string]uint64),
 		leases:   make(map[string]clientv3.LeaseID),
 	}
-	if err := configure(e, opts...); err != nil {
+	if err := e.configure(opts...); err != nil {
 		return nil, err
 	}
 
 	return e, nil
 }
 
-func configure(e *etcdRegistry, opts ...registry.Option) error {
+func (e *etcdRegistry) configure(opts ...registry.Option) error {
 	config := clientv3.Config{
 		Endpoints: []string{DefaultAddr},
 	}
@@ -77,6 +79,11 @@ func configure(e *etcdRegistry, opts ...registry.Option) error {
 		if ok {
 			config.Username = u.Username
 			config.Password = u.Password
+		}
+
+		p, ok := e.options.Context.Value(prefixKey{}).(string)
+		if ok {
+			e.prefix = p
 		}
 	}
 
@@ -109,27 +116,6 @@ func configure(e *etcdRegistry, opts ...registry.Option) error {
 	return nil
 }
 
-func encode(s *registry.Service) string {
-	b, _ := json.Marshal(s)
-	return string(b)
-}
-
-func decode(ds []byte) *registry.Service {
-	var s *registry.Service
-	_ = json.Unmarshal(ds, &s)
-	return s
-}
-
-func nodePath(s, id string) string {
-	service := strings.Replace(s, "/", "-", -1)
-	node := strings.Replace(id, "/", "-", -1)
-	return path.Join(prefix, service, node)
-}
-
-func servicePath(s string) string {
-	return path.Join(prefix, strings.Replace(s, "/", "-", -1))
-}
-
 func (e *etcdRegistry) Options() registry.Options {
 	return e.options
 }
@@ -150,7 +136,7 @@ func (e *etcdRegistry) registerNode(s *registry.Service, node *registry.Node, op
 		defer cancel()
 
 		// look for the existing key
-		rsp, err := e.client.Get(ctx, nodePath(s.Name, node.Id), clientv3.WithSerializable())
+		rsp, err := e.client.Get(ctx, nodePath(e.prefix, s.Name, node.Id), clientv3.WithSerializable())
 		if err != nil {
 			return err
 		}
@@ -244,9 +230,9 @@ func (e *etcdRegistry) registerNode(s *registry.Service, node *registry.Node, op
 	log.Tracef("Registering %s id %s with lease %v and ttl %v", service.Name, node.Id, lgr, options.TTL)
 	// create an entry for the node
 	if lgr != nil {
-		_, err = e.client.Put(ctx, nodePath(service.Name, node.Id), encode(service), clientv3.WithLease(lgr.ID))
+		_, err = e.client.Put(ctx, nodePath(e.prefix, service.Name, node.Id), encode(service), clientv3.WithLease(lgr.ID))
 	} else {
-		_, err = e.client.Put(ctx, nodePath(service.Name, node.Id), encode(service))
+		_, err = e.client.Put(ctx, nodePath(e.prefix, service.Name, node.Id), encode(service))
 	}
 	if err != nil {
 		return err
@@ -281,7 +267,7 @@ func (e *etcdRegistry) Deregister(s *registry.Service) error {
 		defer cancel()
 
 		log.Tracef("Registering %s id %s", s.Name, node.Id)
-		_, err := e.client.Delete(ctx, nodePath(s.Name, node.Id))
+		_, err := e.client.Delete(ctx, nodePath(e.prefix, s.Name, node.Id))
 		if err != nil {
 			return err
 		}
@@ -312,7 +298,7 @@ func (e *etcdRegistry) GetService(name string) ([]*registry.Service, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), e.options.Timeout)
 	defer cancel()
 
-	rsp, err := e.client.Get(ctx, servicePath(name)+"/", clientv3.WithPrefix(), clientv3.WithSerializable())
+	rsp, err := e.client.Get(ctx, servicePath(e.prefix, name)+"/", clientv3.WithPrefix(), clientv3.WithSerializable())
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +340,7 @@ func (e *etcdRegistry) ListServices() ([]*registry.Service, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), e.options.Timeout)
 	defer cancel()
 
-	rsp, err := e.client.Get(ctx, prefix, clientv3.WithPrefix(), clientv3.WithSerializable())
+	rsp, err := e.client.Get(ctx, e.prefix, clientv3.WithPrefix(), clientv3.WithSerializable())
 	if err != nil {
 		return nil, err
 	}
@@ -394,4 +380,25 @@ func (e *etcdRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 
 func (e *etcdRegistry) String() string {
 	return "etcd"
+}
+
+func encode(s *registry.Service) string {
+	b, _ := json.Marshal(s)
+	return string(b)
+}
+
+func decode(ds []byte) *registry.Service {
+	var s *registry.Service
+	_ = json.Unmarshal(ds, &s)
+	return s
+}
+
+func nodePath(prefix, s, id string) string {
+	service := strings.Replace(s, "/", "-", -1)
+	node := strings.Replace(id, "/", "-", -1)
+	return path.Join(prefix, service, node)
+}
+
+func servicePath(prefix, s string) string {
+	return path.Join(prefix, strings.Replace(s, "/", "-", -1))
 }

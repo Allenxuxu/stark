@@ -30,9 +30,9 @@ func newEtcdWatcher(r *etcdRegistry, timeout time.Duration, opts ...registry.Wat
 		cancel()
 	}()
 
-	watchPath := prefix
+	watchPath := r.prefix
 	if len(wo.Service) > 0 {
-		watchPath = servicePath(wo.Service) + "/"
+		watchPath = servicePath(watchPath, wo.Service) + "/"
 	}
 
 	return &etcdWatcher{

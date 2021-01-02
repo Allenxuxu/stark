@@ -75,7 +75,8 @@ var (
 
 func main() {
 	rg, err := etcd.NewRegistry(
-		registry.Addrs("localhost:2379"))
+		registry.Addrs("localhost:2379"),
+		etcd.Prefix("/allen/test/"))
 	if err != nil {
 		log.Fatal(err)
 	}
