@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/Allenxuxu/stark/registry"
+import "github.com/Allenxuxu/stark/pkg/registry"
 
 func addNodes(old, neu []*registry.Node) []*registry.Node {
 	nodes := make([]*registry.Node, len(neu))

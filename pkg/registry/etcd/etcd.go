@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Allenxuxu/stark/registry"
-	"github.com/Allenxuxu/stark/util/log"
+	"github.com/Allenxuxu/stark/log"
+	"github.com/Allenxuxu/stark/pkg/registry"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	json "github.com/json-iterator/go"

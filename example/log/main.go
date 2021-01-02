@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Allenxuxu/stark/util/log"
+	"github.com/Allenxuxu/stark/log"
 )
 
 func main() {

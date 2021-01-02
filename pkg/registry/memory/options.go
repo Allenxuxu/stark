@@ -3,7 +3,7 @@ package memory
 import (
 	"context"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
 type servicesKey struct{}

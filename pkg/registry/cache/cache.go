@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Allenxuxu/stark/registry"
-	"github.com/Allenxuxu/stark/util/log"
+	"github.com/Allenxuxu/stark/log"
+	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
 // Cache is the registry cache interface

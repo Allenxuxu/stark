@@ -3,7 +3,7 @@ package etcd
 import (
 	"context"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
 type authKey struct{}

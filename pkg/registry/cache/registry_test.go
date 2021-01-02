@@ -3,7 +3,7 @@ package cache
 import (
 	"testing"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
 func TestRemove(t *testing.T) {

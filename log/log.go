@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Allenxuxu/stark/env"
+	"github.com/Allenxuxu/stark/internal/env"
 	"github.com/go-log/log"
 	golog "github.com/go-log/log/log"
 )

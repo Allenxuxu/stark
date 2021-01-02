@@ -3,7 +3,7 @@ package memory
 import (
 	"testing"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
 func TestWatcher(t *testing.T) {

@@ -4,7 +4,7 @@ package mdns
 import (
 	"context"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/pkg/registry"
 )
 
 // Domain sets the mdnsDomain
