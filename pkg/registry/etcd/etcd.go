@@ -13,10 +13,10 @@ import (
 
 	"github.com/Allenxuxu/stark/log"
 	"github.com/Allenxuxu/stark/pkg/registry"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	json "github.com/json-iterator/go"
 	hash "github.com/mitchellh/hashstructure"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 )
 
 var (
