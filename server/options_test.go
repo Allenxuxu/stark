@@ -20,9 +20,7 @@ func TestUnaryServerInterceptor(t *testing.T) {
 		opt(&opts)
 	}
 
-	grpcOptions := getGrpcServerOptions(opts.Context)
-
-	assert.Equal(t, len(grpcOptions), n)
+	assert.Equal(t, len(opts.GrpcOpts), n)
 }
 
 func TestStreamServerInterceptor(t *testing.T) {
@@ -37,9 +35,7 @@ func TestStreamServerInterceptor(t *testing.T) {
 		opt(&opts)
 	}
 
-	grpcOptions := getGrpcServerOptions(opts.Context)
-
-	assert.Equal(t, len(grpcOptions), n)
+	assert.Equal(t, len(opts.GrpcOpts), n)
 }
 
 func TestGrpcOptions(t *testing.T) {
@@ -62,7 +58,5 @@ func TestGrpcOptions(t *testing.T) {
 		opt(&opts)
 	}
 
-	grpcOptions := getGrpcServerOptions(opts.Context)
-
-	assert.Equal(t, len(grpcOptions), n*2)
+	assert.Equal(t, len(opts.GrpcOpts), n*2)
 }

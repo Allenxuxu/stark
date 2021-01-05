@@ -48,7 +48,6 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 		RegisterCheck:    DefaultRegisterCheck,
 		RegisterTTL:      DefaultRegisterTTL,
 		RegisterInterval: DefaultRegisterInterval,
-		Context:          context.Background(),
 	}
 
 	for _, o := range opt {
@@ -60,7 +59,7 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 		registry: rg,
 		exit:     make(chan struct{}),
 	}
-	g.grpcSever = grpc.NewServer(getGrpcServerOptions(opts.Context)...)
+	g.grpcSever = grpc.NewServer(opts.GrpcOpts...)
 
 	return g
 }

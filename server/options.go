@@ -21,9 +21,7 @@ type Options struct {
 	// The interval on which to register
 	RegisterInterval time.Duration
 
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
+	GrpcOpts []grpc.ServerOption
 }
 
 type Option func(*Options)
@@ -84,44 +82,16 @@ func RegisterInterval(t time.Duration) Option {
 	}
 }
 
-type grpcOptionsKey struct{}
-
 // UnaryServerInterceptor to be used to configure gRPC options
-func UnaryServerInterceptor(u ...grpc.UnaryServerInterceptor) Option {
+func UnaryServerInterceptor(u grpc.UnaryServerInterceptor) Option {
 	return func(o *Options) {
-		if o.Context == nil {
-			o.Context = context.Background()
-		}
-
-		opts := getGrpcServerOptions(o.Context)
-		opts = append(opts, grpc.ChainUnaryInterceptor(u...))
-
-		o.Context = context.WithValue(o.Context, grpcOptionsKey{}, opts)
+		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainUnaryInterceptor(u))
 	}
 }
 
 // StreamServerInterceptor to be used to configure gRPC options
-func StreamServerInterceptor(u ...grpc.StreamServerInterceptor) Option {
+func StreamServerInterceptor(u grpc.StreamServerInterceptor) Option {
 	return func(o *Options) {
-		if o.Context == nil {
-			o.Context = context.Background()
-		}
-
-		opts := getGrpcServerOptions(o.Context)
-		opts = append(opts, grpc.ChainStreamInterceptor(u...))
-
-		o.Context = context.WithValue(o.Context, grpcOptionsKey{}, opts)
+		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainStreamInterceptor(u))
 	}
-}
-
-func getGrpcServerOptions(ctx context.Context) (opts []grpc.ServerOption) {
-	if ctx == nil {
-		return
-	}
-
-	if v := ctx.Value(grpcOptionsKey{}); v != nil {
-		opts = v.([]grpc.ServerOption)
-	}
-
-	return
 }
