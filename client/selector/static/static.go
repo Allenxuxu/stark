@@ -9,13 +9,8 @@ import (
 // staticSelector is a static selector
 type staticSelector struct {
 	opts selector.Options
-}
 
-func (s *staticSelector) Init(opts ...selector.Option) error {
-	for _, o := range opts {
-		o(&s.opts)
-	}
-	return nil
+	nodes []*registry.Node
 }
 
 func (s *staticSelector) Options() selector.Options {
@@ -23,10 +18,14 @@ func (s *staticSelector) Options() selector.Options {
 }
 
 func (s *staticSelector) Next(service string, opts ...selector.SelectOption) (*registry.Node, error) {
-	return &registry.Node{
-		Id:      service,
-		Address: service,
-	}, nil
+	rs := &registry.Service{
+		Name:      "",
+		Version:   "",
+		Metadata:  nil,
+		Endpoints: nil,
+		Nodes:     s.nodes,
+	}
+	return s.opts.Strategy([]*registry.Service{rs})
 }
 
 func (s *staticSelector) Mark(service string, node *registry.Node, err error) {
@@ -45,12 +44,17 @@ func (s *staticSelector) String() string {
 	return "static"
 }
 
-func NewSelector(opts ...selector.Option) selector.Selector {
-	var options selector.Options
+func NewSelector(nodes []*registry.Node, opts ...selector.Option) selector.Selector {
+	options := selector.Options{
+		Strategy: selector.RoundRobin(),
+	}
+
 	for _, o := range opts {
 		o(&options)
 	}
+
 	return &staticSelector{
-		opts: options,
+		opts:  options,
+		nodes: nodes,
 	}
 }

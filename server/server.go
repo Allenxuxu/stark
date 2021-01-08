@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	DefaultAddress          = ":9090"
+	DefaultAddress          = ":0"
 	DefaultName             = "stark.rpc.server"
 	DefaultVersion          = time.Now().Format("2006.01.02.15.04")
 	DefaultId               = uuid.New().String()
@@ -60,7 +60,17 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 		exit:     make(chan struct{}),
 	}
 	g.grpcSever = grpc.NewServer(opts.GrpcOpts...)
-
+	g.service = &registry.Service{
+		Name:      g.opts.Name,
+		Version:   g.opts.Version,
+		Metadata:  g.opts.Metadata,
+		Endpoints: nil,
+		Nodes: []*registry.Node{{
+			Id:       g.opts.Id,
+			Address:  g.opts.Address,
+			Metadata: g.opts.Metadata},
+		},
+	}
 	return g
 }
 
@@ -70,17 +80,7 @@ func (g *Server) Register(service ...interface{}) {
 		endpoints = append(endpoints, extractEndpoints(s)...)
 	}
 
-	g.service = &registry.Service{
-		Name:      g.opts.Name,
-		Version:   g.opts.Version,
-		Metadata:  g.opts.Metadata,
-		Endpoints: endpoints,
-		Nodes: []*registry.Node{{
-			Id:       g.opts.Id,
-			Address:  g.opts.Address,
-			Metadata: g.opts.Metadata},
-		},
-	}
+	g.service.Endpoints = endpoints
 }
 
 func (g *Server) GrpcServer() *grpc.Server {
@@ -93,11 +93,15 @@ func (g *Server) Start() error {
 		return err
 	}
 
+	g.opts.Address = listener.Addr().String()
+	g.service.Nodes[0].Address = listener.Addr().String()
+
 	if err := g.register(); err != nil {
 		return err
 	}
 
 	reflection.Register(g.grpcSever)
+	log.Infof("%s server listen on %s", g.opts.Name, g.opts.Address)
 	return g.grpcSever.Serve(listener)
 }
 
@@ -135,7 +139,6 @@ func (g *Server) register() error {
 	g.sw.AddAndRun(func() {
 		t := new(time.Ticker)
 		if g.opts.RegisterInterval > time.Duration(0) {
-			// new ticker
 			t = time.NewTicker(g.opts.RegisterInterval)
 		}
 
