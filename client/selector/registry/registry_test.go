@@ -3,12 +3,11 @@ package registry
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/Allenxuxu/stark/client/selector"
 
 	"github.com/Allenxuxu/stark/pkg/registry"
-	"github.com/Allenxuxu/stark/pkg/selector"
-
 	"github.com/Allenxuxu/stark/pkg/registry/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -54,20 +53,32 @@ var (
 )
 
 func TestRegistrySelector(t *testing.T) {
-	counts := map[string]int{}
-
 	r, err := memory.NewRegistry(memory.Services(testData))
 	assert.Nil(t, err)
-	cache, err := NewSelector(selector.Registry(r))
+	cache, err := NewSelector(r)
 	assert.Nil(t, err)
 
-	for i := 0; i < 100; i++ {
-		node, err := cache.Next("foo")
-		if err != nil {
-			t.Errorf("Expected node err, got err: %v", err)
-		}
-		counts[node.Id]++
-	}
+	service, err := cache.GetService("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, 3, len(service))
 
-	t.Logf("Selector Counts %v", counts)
+	for _, s := range service {
+		assert.Equal(t, s.Name, "foo")
+		assert.Contains(t, []string{"1.0.3", "1.0.0", "1.0.1"}, s.Version)
+	}
+}
+
+func TestRegistrySelectorFilter(t *testing.T) {
+
+	version := "1.0.0"
+	r, err := memory.NewRegistry(memory.Services(testData))
+	assert.Nil(t, err)
+	cache, err := NewSelector(r, selector.WithFilter(selector.FilterVersion(version)))
+	assert.Nil(t, err)
+
+	service, err := cache.GetService("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(service))
+	assert.Equal(t, service[0].Name, "foo")
+	assert.Equal(t, service[0].Version, version)
 }

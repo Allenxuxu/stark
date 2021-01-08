@@ -1,45 +1,63 @@
 package registry
 
 import (
+	"fmt"
+	"sync/atomic"
 	"time"
 
+	sr "github.com/Allenxuxu/stark/client/resolver"
+	"github.com/Allenxuxu/stark/client/selector"
 	"github.com/Allenxuxu/stark/pkg/registry"
 	"github.com/Allenxuxu/stark/pkg/registry/cache"
-	"github.com/Allenxuxu/stark/pkg/registry/mdns"
-	"github.com/Allenxuxu/stark/pkg/selector"
+	"google.golang.org/grpc/resolver"
 )
+
+const scheme = "stark_registry"
+
+var _selector atomic.Value
+
+func registerSelector(s selector.Selector) {
+	_selector.Store(s)
+}
+
+func init() {
+	resolver.Register(sr.NewBuilder(scheme, &_selector))
+}
 
 type registrySelector struct {
 	opts selector.Options
 	rc   cache.Cache
 }
 
-func (c *registrySelector) newCache() cache.Cache {
-	opts := make([]cache.Option, 0, 1)
-	if c.opts.Context != nil {
-		if t, ok := c.opts.Context.Value("selector_ttl").(time.Duration); ok {
-			opts = append(opts, cache.WithTTL(t))
+func NewSelector(rg registry.Registry, opt ...selector.Option) (selector.Selector, error) {
+	var opts selector.Options
+	for _, opt := range opt {
+		opt(&opts)
+	}
+
+	cacheOpts := make([]cache.Option, 0, 1)
+	if opts.Context != nil {
+		if t, ok := opts.Context.Value(ttlKey).(time.Duration); ok {
+			cacheOpts = append(cacheOpts, cache.WithTTL(t))
 		}
 	}
-	return cache.New(c.opts.Registry, opts...)
+
+	s := &registrySelector{
+		opts: opts,
+		rc:   cache.New(rg, cacheOpts...),
+	}
+
+	// fixme do better
+	registerSelector(s)
+
+	return s, nil
 }
 
 func (c *registrySelector) Options() selector.Options {
 	return c.opts
 }
 
-func (c *registrySelector) Next(service string, opts ...selector.SelectOption) (*registry.Node, error) {
-	sopts := selector.SelectOptions{
-		Strategy: c.opts.Strategy,
-	}
-
-	for _, opt := range opts {
-		opt(&sopts)
-	}
-
-	// get the service
-	// try the cache first
-	// if that fails go directly to the registry
+func (c *registrySelector) GetService(service string) ([]*registry.Service, error) {
 	services, err := c.rc.GetService(service)
 	if err != nil {
 		if err == registry.ErrNotFound {
@@ -48,23 +66,19 @@ func (c *registrySelector) Next(service string, opts ...selector.SelectOption) (
 		return nil, err
 	}
 
-	// apply the filters
-	for _, filter := range sopts.Filters {
+	for _, filter := range c.opts.Filters {
 		services = filter(services)
 	}
 
-	// if there's nothing left, return
 	if len(services) == 0 {
 		return nil, selector.ErrNoneAvailable
 	}
 
-	return sopts.Strategy(services)
+	return services, nil
 }
 
-func (c *registrySelector) Mark(service string, node *registry.Node, err error) {
-}
-
-func (c *registrySelector) Reset(service string) {
+func (c *registrySelector) Watch(service string) (registry.Watcher, error) {
+	return c.rc.Watch(registry.WatchService(service))
 }
 
 // Close stops the watcher and destroys the cache
@@ -74,31 +88,10 @@ func (c *registrySelector) Close() error {
 	return nil
 }
 
-func (c *registrySelector) String() string {
-	return "registry"
+func (c *registrySelector) Address(service string) string {
+	return fmt.Sprintf("%s:///%s", scheme, service)
 }
 
-func NewSelector(opts ...selector.Option) (selector.Selector, error) {
-	var err error
-	sopts := selector.Options{
-		Strategy: selector.Random(),
-	}
-
-	for _, opt := range opts {
-		opt(&sopts)
-	}
-
-	if sopts.Registry == nil {
-		sopts.Registry, err = mdns.NewRegistry()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	s := &registrySelector{
-		opts: sopts,
-	}
-	s.rc = s.newCache()
-
-	return s, nil
+func (c *registrySelector) String() string {
+	return "registry"
 }

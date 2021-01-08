@@ -4,8 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/Allenxuxu/stark/pkg/selector"
+	"github.com/Allenxuxu/stark/client/selector"
 )
+
+const ttlKey = "selector_ttl"
 
 // Set the registry cache ttl
 func TTL(t time.Duration) selector.Option {
@@ -13,6 +15,6 @@ func TTL(t time.Duration) selector.Option {
 		if o.Context == nil {
 			o.Context = context.Background()
 		}
-		o.Context = context.WithValue(o.Context, "selector_ttl", t)
+		o.Context = context.WithValue(o.Context, ttlKey, t)
 	}
 }

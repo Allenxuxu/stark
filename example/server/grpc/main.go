@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"google.golang.org/grpc/metadata"
-
 	"github.com/Allenxuxu/stark/example/server/grpc/unary"
 	"github.com/Allenxuxu/stark/pkg/registry/etcd"
 	"github.com/Allenxuxu/stark/server"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 )
 
 type GreetServer struct{}
@@ -62,7 +62,9 @@ func main() {
 	interceptor := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		st := time.Now()
 		resp, err = handler(ctx, req)
-		log.Printf("method: %s time: %v\n", info.FullMethod, time.Since(st))
+
+		p, _ := peer.FromContext(ctx)
+		log.Printf("method: %s time: %v, peer : %s\n", info.FullMethod, time.Since(st), p.Addr)
 		return resp, err
 	}
 
@@ -71,9 +73,8 @@ func main() {
 		panic(err)
 	}
 	s := server.NewServer(rg,
-		server.Name("testserver"),
-		server.Id("id123"),
-		server.Address(":9091"),
+		server.Name("stark.rpc.test"),
+		//server.Address(":9091"),
 		server.UnaryServerInterceptor(interceptor),
 	)
 

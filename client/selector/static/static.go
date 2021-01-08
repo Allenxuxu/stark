@@ -2,59 +2,80 @@
 package static
 
 import (
+	"fmt"
+	"sync/atomic"
+
+	sr "github.com/Allenxuxu/stark/client/resolver"
+	"github.com/Allenxuxu/stark/client/selector"
 	"github.com/Allenxuxu/stark/pkg/registry"
-	"github.com/Allenxuxu/stark/pkg/selector"
+	"google.golang.org/grpc/resolver"
 )
+
+const scheme = "stark_static"
+
+var _selector atomic.Value
+
+func registerSelector(s selector.Selector) {
+	_selector.Store(s)
+}
+
+func init() {
+	resolver.Register(sr.NewBuilder(scheme, &_selector))
+}
 
 // staticSelector is a static selector
 type staticSelector struct {
 	opts selector.Options
 
-	nodes []*registry.Node
+	service []*registry.Service
+}
+
+func NewSelector(service []*registry.Service, opts ...selector.Option) selector.Selector {
+	var options selector.Options
+	for _, o := range opts {
+		o(&options)
+	}
+
+	s := &staticSelector{
+		opts:    options,
+		service: service,
+	}
+
+	// fixme do better
+	registerSelector(s)
+
+	return s
 }
 
 func (s *staticSelector) Options() selector.Options {
 	return s.opts
 }
 
-func (s *staticSelector) Next(service string, opts ...selector.SelectOption) (*registry.Node, error) {
-	rs := &registry.Service{
-		Name:      "",
-		Version:   "",
-		Metadata:  nil,
-		Endpoints: nil,
-		Nodes:     s.nodes,
+func (s *staticSelector) GetService(service string) ([]*registry.Service, error) {
+
+	for _, filter := range s.opts.Filters {
+		s.service = filter(s.service)
 	}
-	return s.opts.Strategy([]*registry.Service{rs})
+
+	if len(s.service) == 0 {
+		return nil, selector.ErrNoneAvailable
+	}
+
+	return s.service, nil
 }
 
-func (s *staticSelector) Mark(service string, node *registry.Node, err error) {
-	return
-}
-
-func (s *staticSelector) Reset(service string) {
-	return
+func (s *staticSelector) Watch(service string) (registry.Watcher, error) {
+	return nil, nil
 }
 
 func (s *staticSelector) Close() error {
 	return nil
 }
 
-func (s *staticSelector) String() string {
-	return "static"
+func (s *staticSelector) Address(service string) string {
+	return fmt.Sprintf("%s:///%s", scheme, service)
 }
 
-func NewSelector(nodes []*registry.Node, opts ...selector.Option) selector.Selector {
-	options := selector.Options{
-		Strategy: selector.RoundRobin(),
-	}
-
-	for _, o := range opts {
-		o(&options)
-	}
-
-	return &staticSelector{
-		opts:  options,
-		nodes: nodes,
-	}
+func (s *staticSelector) String() string {
+	return "static"
 }
