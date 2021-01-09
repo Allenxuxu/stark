@@ -55,6 +55,7 @@ type Config struct {
 // mDNS server is used to listen for mDNS queries and respond if we
 // have a matching local record
 type Server struct {
+	mu     sync.Mutex
 	config *Config
 
 	ipv4List *net.UDPConn
@@ -305,7 +306,9 @@ func (s *Server) handleQuery(query *dns.Msg, from net.Addr) error {
 // The response to a question may be transmitted over multicast, unicast, or
 // both.  The return values are DNS records for each transmission type.
 func (s *Server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dns.RR) {
+	s.mu.Lock()
 	records := s.config.Zone.Records(q)
+	s.mu.Unlock()
 
 	if len(records) == 0 {
 		return nil, nil
@@ -331,10 +334,16 @@ func (s *Server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dn
 func (s *Server) probe() {
 	defer s.wg.Done()
 
-	sd, ok := s.config.Zone.(*MDNSService)
+	s.mu.Lock()
+	mDNSService, ok := s.config.Zone.(*MDNSService)
 	if !ok {
+		s.mu.Unlock()
 		return
 	}
+
+	// TODO do better
+	sd := *mDNSService
+	s.mu.Unlock()
 
 	name := fmt.Sprintf("%s.%s.%s.", sd.Instance, trimDot(sd.Service), trimDot(sd.Domain))
 
@@ -380,7 +389,9 @@ func (s *Server) probe() {
 	// set for query
 	q.SetQuestion(name, dns.TypeANY)
 
+	s.mu.Lock()
 	resp.Answer = append(resp.Answer, s.config.Zone.Records(q.Question[0])...)
+	s.mu.Unlock()
 
 	// reset
 	q.SetQuestion(name, dns.TypePTR)
@@ -444,6 +455,9 @@ func (s *Server) sendResponse(resp *dns.Msg, from net.Addr) error {
 }
 
 func (s *Server) unregister() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	sd, ok := s.config.Zone.(*MDNSService)
 	if !ok {
 		return nil
