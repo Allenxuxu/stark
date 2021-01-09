@@ -11,7 +11,7 @@ import (
 	"time"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/registry/etcd"
+	"github.com/Allenxuxu/stark/registry/mdns"
 	"github.com/Allenxuxu/stark/rpc/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
@@ -98,19 +98,20 @@ func main() {
 		return resp, err
 	}
 
-	rg, err := etcd.NewRegistry()
+	rg, err := mdns.NewRegistry()
+	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
 	}
 	s := server.NewServer(rg,
 		server.Name("stark.rpc.test"),
-		//server.Address(":9091"),
+		//server.Address("127.0.0.1:9091"),
 		server.UnaryServerInterceptor(interceptor),
 	)
 
 	rs := NewServer()
 	pb.RegisterRouteGuideServer(s.GrpcServer(), rs)
-	s.RegisterEndpoints(rs)
+	//s.RegisterEndpoints(rs)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)

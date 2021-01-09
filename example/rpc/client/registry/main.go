@@ -5,16 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Allenxuxu/stark/registry/mdns"
-
-	"github.com/Allenxuxu/stark/rpc/client/balancer"
-
-	"google.golang.org/grpc"
-
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
+	"github.com/Allenxuxu/stark/registry/mdns"
 	"github.com/Allenxuxu/stark/rpc/client"
+	"github.com/Allenxuxu/stark/rpc/client/balancer"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/stark/rpc/client/selector/registry"
+	"google.golang.org/grpc"
 )
 
 func main() {
