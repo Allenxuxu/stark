@@ -8,7 +8,6 @@ import (
 
 	"github.com/Allenxuxu/stark/log"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
-	"github.com/Allenxuxu/toolkit/sync"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -53,8 +52,6 @@ type starkResolver struct {
 	cc       resolver.ClientConn
 	watcher  registry.Watcher
 	service  string
-
-	wg sync.WaitGroupWrapper
 }
 
 func (r *starkResolver) run() (err error) {
@@ -72,7 +69,7 @@ func (r *starkResolver) run() (err error) {
 		return nil
 	}
 
-	r.wg.AddAndRun(func() {
+	go func() {
 		for {
 			_, err := r.watcher.Next()
 			if err != nil {
@@ -84,7 +81,7 @@ func (r *starkResolver) run() (err error) {
 				log.Errorf("stark resolver update state error:", err)
 			}
 		}
-	})
+	}()
 
 	return nil
 }
@@ -113,9 +110,6 @@ func (r *starkResolver) Close() {
 	if r.selector != nil {
 		_ = r.selector.Close()
 	}
-	r.wg.Wait()
 }
 
-func (r *starkResolver) ResolveNow(options resolver.ResolveNowOptions) {
-	_ = r.updateState()
-}
+func (r *starkResolver) ResolveNow(options resolver.ResolveNowOptions) {}

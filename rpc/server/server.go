@@ -96,13 +96,19 @@ func (g *Server) Start() error {
 	g.opts.Address = listener.Addr().String()
 	g.service.Nodes[0].Address = listener.Addr().String()
 
-	if err := g.register(); err != nil {
+	if err = g.register(); err != nil {
 		return err
 	}
 
 	reflection.Register(g.grpcSever)
+	if err = g.grpcSever.Serve(listener); err != nil {
+		return err
+	}
 	log.Infof("%s server listen on %s", g.opts.Name, g.opts.Address)
-	return g.grpcSever.Serve(listener)
+
+	g.sw.Wait()
+
+	return nil
 }
 
 func (g *Server) Stop() error {
@@ -111,10 +117,10 @@ func (g *Server) Stop() error {
 		return nil
 	default:
 		close(g.exit)
-		g.sw.Wait()
 	}
 
 	g.grpcSever.GracefulStop()
+
 	return nil
 }
 
