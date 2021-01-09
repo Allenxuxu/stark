@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Allenxuxu/stark/registry/consul"
+
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/registry/mdns"
 	"github.com/Allenxuxu/stark/rpc/client"
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
@@ -15,7 +16,8 @@ import (
 )
 
 func main() {
-	rg, err := mdns.NewRegistry()
+	rg, err := consul.NewRegistry()
+	//rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)

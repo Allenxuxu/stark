@@ -250,6 +250,10 @@ func (c *consulRegistry) Register(s *registry.Service, opts ...registry.Register
 	if host == "" {
 		host = node.Address
 	}
+	if host == "::" {
+		host = ""
+	}
+
 	port, _ := strconv.Atoi(pt)
 
 	// register the service
@@ -420,7 +424,7 @@ func (c *consulRegistry) Client() *consul.Client {
 	return c.client
 }
 
-func NewRegistry(opts ...registry.Option) registry.Registry {
+func NewRegistry(opts ...registry.Option) (registry.Registry, error) {
 	cr := &consulRegistry{
 		opts:        registry.Options{},
 		register:    make(map[string]uint64),
@@ -430,5 +434,5 @@ func NewRegistry(opts ...registry.Option) registry.Registry {
 		},
 	}
 	configure(cr, opts...)
-	return cr
+	return cr, nil
 }

@@ -10,8 +10,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Allenxuxu/stark/registry/consul"
+
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/registry/mdns"
 	"github.com/Allenxuxu/stark/rpc/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
@@ -98,7 +99,8 @@ func main() {
 		return resp, err
 	}
 
-	rg, err := mdns.NewRegistry()
+	rg, err := consul.NewRegistry()
+	//rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
