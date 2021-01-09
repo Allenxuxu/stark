@@ -3,7 +3,7 @@ package selector
 import (
 	"testing"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 )
 
 func TestFilterEndpoint(t *testing.T) {

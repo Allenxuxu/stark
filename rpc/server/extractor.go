@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"reflect"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 )
 
 func extractEndpoints(handler interface{}) []*registry.Endpoint {

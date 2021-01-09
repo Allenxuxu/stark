@@ -7,7 +7,7 @@ import (
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
 
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 	"github.com/Allenxuxu/stark/rpc/client"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/stark/rpc/client/selector/static"

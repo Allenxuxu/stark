@@ -5,8 +5,8 @@ import (
 
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
-	"github.com/Allenxuxu/stark/pkg/registry/memory"
+	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/registry/memory"
 	"github.com/stretchr/testify/assert"
 )
 

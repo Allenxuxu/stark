@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
-	"github.com/Allenxuxu/stark/pkg/registry/cache"
+	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/registry/cache"
 	sr "github.com/Allenxuxu/stark/rpc/client/resolver"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"google.golang.org/grpc/resolver"

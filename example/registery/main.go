@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/stark/pkg/registry"
-	"github.com/Allenxuxu/stark/pkg/registry/etcd"
+	"github.com/Allenxuxu/stark/registry"
+	"github.com/Allenxuxu/stark/registry/etcd"
 )
 
 var (

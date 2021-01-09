@@ -11,7 +11,7 @@ import (
 	"time"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/pkg/registry/etcd"
+	"github.com/Allenxuxu/stark/registry/etcd"
 	"github.com/Allenxuxu/stark/rpc/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"

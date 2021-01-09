@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 	"github.com/google/uuid"
 )
 

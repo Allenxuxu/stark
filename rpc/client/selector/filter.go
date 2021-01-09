@@ -1,7 +1,7 @@
 package selector
 
 import (
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 )
 
 // Filter is used to filter a service during the selection process

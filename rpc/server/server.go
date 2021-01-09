@@ -10,7 +10,7 @@ import (
 	"github.com/Allenxuxu/toolkit/sync"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 )

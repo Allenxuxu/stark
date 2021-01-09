@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 	json "github.com/json-iterator/go"
 	hash "github.com/mitchellh/hashstructure"
 	"go.etcd.io/etcd/clientv3"

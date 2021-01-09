@@ -4,7 +4,7 @@ package selector
 import (
 	"errors"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 )
 
 // Selector builds on the registry as a mechanism to pick nodes

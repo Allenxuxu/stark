@@ -3,7 +3,7 @@ package etcd
 import (
 	"context"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 )
 
 type (

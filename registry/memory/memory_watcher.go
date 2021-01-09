@@ -3,7 +3,7 @@ package memory
 import (
 	"errors"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 )
 
 type memoryWatcher struct {

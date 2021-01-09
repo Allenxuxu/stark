@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/Allenxuxu/stark/pkg/mdns"
-	registry2 "github.com/Allenxuxu/stark/pkg/registry"
+	registry2 "github.com/Allenxuxu/stark/registry"
 )
 
 type mdnsWatcher struct {

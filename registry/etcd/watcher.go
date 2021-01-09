@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/registry"
 	"go.etcd.io/etcd/clientv3"
 )
 
