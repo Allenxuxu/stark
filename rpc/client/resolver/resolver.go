@@ -78,7 +78,7 @@ func (r *starkResolver) run() (err error) {
 			}
 
 			if err := r.updateState(); err != nil {
-				log.Errorf("stark resolver update state error:", err)
+				log.Errorf("stark resolver update state error: %v", err)
 			}
 		}
 	}()

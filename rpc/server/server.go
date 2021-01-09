@@ -101,10 +101,11 @@ func (g *Server) Start() error {
 	}
 
 	reflection.Register(g.grpcSever)
+
+	log.Infof("%s server listen on %s", g.opts.Name, g.opts.Address)
 	if err = g.grpcSever.Serve(listener); err != nil {
 		return err
 	}
-	log.Infof("%s server listen on %s", g.opts.Name, g.opts.Address)
 
 	g.sw.Wait()
 
