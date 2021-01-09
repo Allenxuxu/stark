@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Allenxuxu/stark/registry/mdns"
+
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
 
 	"google.golang.org/grpc"
 
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/registry/etcd"
 	"github.com/Allenxuxu/stark/rpc/client"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/stark/rpc/client/selector/registry"
 )
 
 func main() {
-	rg, err := etcd.NewRegistry()
+	rg, err := mdns.NewRegistry()
+	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
 	}

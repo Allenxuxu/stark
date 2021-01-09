@@ -143,7 +143,6 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 			continue
 		}
 
-		//
 		host, pt, err := net.SplitHostPort(node.Address)
 		if err != nil {
 			gerr = err
@@ -266,9 +265,16 @@ func (m *mdnsRegistry) GetService(service string) ([]*registry.Service, error) {
 					}
 				}
 
+				var address string
+				if len(e.AddrV4) != 0 {
+					address = fmt.Sprintf("%s:%d", e.AddrV4.String(), e.Port)
+				} else {
+					address = fmt.Sprintf("[%s]:%d", e.AddrV6.String(), e.Port)
+				}
+
 				s.Nodes = append(s.Nodes, &registry.Node{
 					Id:       strings.TrimSuffix(e.Name, "."+p.Service+"."+p.Domain+"."),
-					Address:  fmt.Sprintf("%s:%d", e.AddrV4.String(), e.Port),
+					Address:  address,
 					Metadata: txt.Metadata,
 				})
 

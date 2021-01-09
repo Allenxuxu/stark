@@ -1,7 +1,6 @@
 package mdns
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -51,15 +50,23 @@ func TestMDNS(t *testing.T) {
 				},
 			},
 		},
-	}
 
-	travis := os.Getenv("TRAVIS")
+		{
+			Name:    "test4",
+			Version: "1.0.4",
+			Nodes: []*registry.Node{
+				{
+					Id:      "test4-1",
+					Address: "[::]:10004",
+					Metadata: map[string]string{
+						"foo4": "bar4",
+					},
+				},
+			},
+		},
+	}
 
 	var opts []registry.Option
-
-	if travis == "true" {
-		opts = append(opts, registry.Timeout(time.Millisecond*100))
-	}
 
 	// new registry
 	r, err := NewRegistry(opts...)
