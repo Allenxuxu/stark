@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Allenxuxu/stark/client/selector"
+	"github.com/Allenxuxu/stark/rpc/client/selector"
 )
 
 const ttlKey = "selector_ttl"

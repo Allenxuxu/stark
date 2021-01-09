@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Allenxuxu/stark/client/selector"
+	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"google.golang.org/grpc"
 )
 

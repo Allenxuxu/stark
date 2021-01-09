@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Allenxuxu/stark/client/balancer"
+	"github.com/Allenxuxu/stark/rpc/client/balancer"
 
-	"github.com/Allenxuxu/stark/client"
-	"github.com/Allenxuxu/stark/client/selector"
-	"github.com/Allenxuxu/stark/client/selector/static"
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/pkg/registry"
+	"github.com/Allenxuxu/stark/rpc/client"
+	"github.com/Allenxuxu/stark/rpc/client/selector"
+	"github.com/Allenxuxu/stark/rpc/client/selector/static"
 	"google.golang.org/grpc"
 )
 

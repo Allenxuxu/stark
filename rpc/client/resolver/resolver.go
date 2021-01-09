@@ -6,8 +6,8 @@ import (
 
 	"github.com/Allenxuxu/stark/pkg/registry"
 
-	"github.com/Allenxuxu/stark/client/selector"
 	"github.com/Allenxuxu/stark/log"
+	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/toolkit/sync"
 	"google.golang.org/grpc/resolver"
 )

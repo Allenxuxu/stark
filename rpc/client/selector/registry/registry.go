@@ -5,10 +5,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	sr "github.com/Allenxuxu/stark/client/resolver"
-	"github.com/Allenxuxu/stark/client/selector"
 	"github.com/Allenxuxu/stark/pkg/registry"
 	"github.com/Allenxuxu/stark/pkg/registry/cache"
+	sr "github.com/Allenxuxu/stark/rpc/client/resolver"
+	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"google.golang.org/grpc/resolver"
 )
 

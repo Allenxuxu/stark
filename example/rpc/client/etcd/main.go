@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Allenxuxu/stark/client/balancer"
+	"github.com/Allenxuxu/stark/rpc/client/balancer"
 
 	"google.golang.org/grpc"
 
-	"github.com/Allenxuxu/stark/client"
-	"github.com/Allenxuxu/stark/client/selector"
-	"github.com/Allenxuxu/stark/client/selector/registry"
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/pkg/registry/etcd"
+	"github.com/Allenxuxu/stark/rpc/client"
+	"github.com/Allenxuxu/stark/rpc/client/selector"
+	"github.com/Allenxuxu/stark/rpc/client/selector/registry"
 )
 
 func main() {
