@@ -1,19 +1,25 @@
-package server
+package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
-	"testing"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/stretchr/testify/assert"
+	"github.com/Allenxuxu/stark/pkg/registry/etcd"
+	"github.com/Allenxuxu/stark/server"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/peer"
 )
 
 type routeGuideServer struct{}
 
-func newServer() *routeGuideServer {
+func NewServer() *routeGuideServer {
 	return &routeGuideServer{}
 }
 
@@ -82,22 +88,42 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 	}
 }
 
-func Test_extractEndpoints(t *testing.T) {
-	service := newServer()
-	tests := []string{
-		"routeGuideServer.RouteChat",
-		"routeGuideServer.RecordRoute",
-		"routeGuideServer.GetFeature",
-		"routeGuideServer.ListFeatures",
+func main() {
+	interceptor := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		st := time.Now()
+		resp, err = handler(ctx, req)
+
+		p, _ := peer.FromContext(ctx)
+		log.Printf("method: %s time: %v, peer : %s\n", info.FullMethod, time.Since(st), p.Addr)
+		return resp, err
 	}
 
-	endpoints := extractEndpoints(service)
-	assert.Equal(t, len(endpoints), 4)
-
-	for _, e := range endpoints {
-		assert.Contains(t, tests, e.Name)
+	rg, err := etcd.NewRegistry()
+	if err != nil {
+		panic(err)
 	}
+	s := server.NewServer(rg,
+		server.Name("stark.rpc.test"),
+		//server.Address(":9091"),
+		server.UnaryServerInterceptor(interceptor),
+	)
 
-	endpoints = extractEndpoints(*service)
-	assert.Equal(t, len(endpoints), 0)
+	rs := NewServer()
+	pb.RegisterRouteGuideServer(s.GrpcServer(), rs)
+	s.RegisterEndpoints(rs)
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		<-ch
+		fmt.Println("stop")
+		if err := s.Stop(); err != nil {
+			panic(err)
+		}
+	}()
+
+	if err := s.Start(); err != nil {
+		panic(err)
+	}
 }

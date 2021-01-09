@@ -12,7 +12,7 @@ import (
 	"github.com/Allenxuxu/stark/client"
 	"github.com/Allenxuxu/stark/client/selector"
 	"github.com/Allenxuxu/stark/client/selector/registry"
-	"github.com/Allenxuxu/stark/example/server/grpc/unary"
+	"github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/pkg/registry/etcd"
 )
 
@@ -37,16 +37,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	c := unary.NewGreeterClient(client.Conn())
+	c := routeguide.NewRouteGuideClient(client.Conn())
 
 	for i := 0; i < 10; i++ {
 
-		resp, err := c.Greet(context.Background(), &unary.Request{Name: "xuxu"})
+		resp, err := c.GetFeature(context.Background(), &routeguide.Point{
+			Latitude:  0,
+			Longitude: 0,
+		})
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println(resp.Greet)
+		fmt.Println(resp.Name, resp.Location.Latitude, resp.Location.Latitude)
 		time.Sleep(time.Second)
 	}
 }

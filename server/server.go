@@ -74,7 +74,7 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 	return g
 }
 
-func (g *Server) Register(service ...interface{}) {
+func (g *Server) RegisterEndpoints(service ...interface{}) {
 	var endpoints []*registry.Endpoint
 	for _, s := range service {
 		endpoints = append(endpoints, extractEndpoints(s)...)

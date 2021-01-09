@@ -9,7 +9,7 @@ import (
 	"github.com/Allenxuxu/stark/client"
 	"github.com/Allenxuxu/stark/client/selector"
 	"github.com/Allenxuxu/stark/client/selector/static"
-	"github.com/Allenxuxu/stark/example/server/grpc/unary"
+	"github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/pkg/registry"
 	"google.golang.org/grpc"
 )
@@ -23,7 +23,6 @@ func main() {
 			Endpoints: nil,
 			Nodes: []*registry.Node{
 				{Address: "127.0.0.1:9092"},
-
 				{Address: "127.0.0.1:9091"},
 				{Address: "127.0.0.1:9092"},
 			},
@@ -48,12 +47,16 @@ func main() {
 		panic(err)
 	}
 
-	c := unary.NewGreeterClient(client.Conn())
+	c := routeguide.NewRouteGuideClient(client.Conn())
 
-	resp, err := c.Greet(context.Background(), &unary.Request{Name: "xuxu"})
+	resp, err := c.GetFeature(context.Background(), &routeguide.Point{
+		Latitude:  0,
+		Longitude: 0,
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(resp.Greet)
+	fmt.Println(resp.Name, resp.Location.Latitude, resp.Location.Latitude)
+
 }
