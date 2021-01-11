@@ -32,6 +32,7 @@ require (
 	github.com/prometheus/client_golang v1.5.1 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
+	github.com/urfave/cli/v2 v2.3.0
 	go.etcd.io/bbolt v1.3.5 // indirect
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
 	go.uber.org/zap v1.16.0 // indirect
