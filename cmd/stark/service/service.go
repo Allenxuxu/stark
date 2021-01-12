@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -51,10 +52,10 @@ func serviceAction(c *cli.Context) error {
 	}
 
 	for _, s := range service {
-		serviceInfo := fmt.Sprintf("%s %s %s", s.Name, s.Version, mapToString(s.Metadata))
+		fmt.Printf("%s %s\n", s.Name, s.Version)
 
 		for _, node := range s.Nodes {
-			fmt.Printf("%s || %s %s %s\n", serviceInfo, node.Id, node.Address, mapToString(node.Metadata))
+			fmt.Printf("\t%s %s %s\n", node.Id, node.Address, mapToString(node.Metadata))
 		}
 	}
 	return nil
@@ -65,5 +66,8 @@ func mapToString(kv map[string]string) string {
 	for k, v := range kv {
 		ret = append(ret, fmt.Sprintf("%s:%s", k, v))
 	}
+
+	sort.Strings(ret)
+
 	return strings.Join(ret, ",")
 }

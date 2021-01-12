@@ -7,11 +7,6 @@ import (
 )
 
 func serviceToRecord(s *registry.Service, ttl time.Duration) *record {
-	metadata := make(map[string]string)
-	for k, v := range s.Metadata {
-		metadata[k] = v
-	}
-
 	nodes := make(map[string]*node)
 	for _, n := range s.Nodes {
 		nodes[n.Id] = &node{
@@ -29,7 +24,6 @@ func serviceToRecord(s *registry.Service, ttl time.Duration) *record {
 	return &record{
 		Name:      s.Name,
 		Version:   s.Version,
-		Metadata:  metadata,
 		Nodes:     nodes,
 		Endpoints: endpoints,
 	}
@@ -84,7 +78,6 @@ func recordToService(r *record) *registry.Service {
 	return &registry.Service{
 		Name:      r.Name,
 		Version:   r.Version,
-		Metadata:  metadata,
 		Endpoints: endpoints,
 		Nodes:     nodes,
 	}

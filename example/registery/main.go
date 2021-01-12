@@ -115,7 +115,6 @@ func main() {
 	if err := rg.Deregister(&registry.Service{
 		Name:      "bar",
 		Version:   "",
-		Metadata:  nil,
 		Endpoints: nil,
 		Nodes: []*registry.Node{
 			{

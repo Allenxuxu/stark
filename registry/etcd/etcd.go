@@ -205,7 +205,6 @@ func (e *etcdRegistry) registerNode(s *registry.Service, node *registry.Node, op
 	service := &registry.Service{
 		Name:      s.Name,
 		Version:   s.Version,
-		Metadata:  s.Metadata,
 		Endpoints: s.Endpoints,
 		Nodes:     []*registry.Node{node},
 	}
@@ -316,7 +315,6 @@ func (e *etcdRegistry) GetService(name string) ([]*registry.Service, error) {
 				s = &registry.Service{
 					Name:      sn.Name,
 					Version:   sn.Version,
-					Metadata:  sn.Metadata,
 					Endpoints: sn.Endpoints,
 				}
 				serviceMap[s.Version] = s

@@ -63,7 +63,6 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 	g.service = &registry.Service{
 		Name:      g.opts.Name,
 		Version:   g.opts.Version,
-		Metadata:  g.opts.Metadata,
 		Endpoints: nil,
 		Nodes: []*registry.Node{{
 			Id:       g.opts.Id,

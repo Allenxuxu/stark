@@ -19,7 +19,6 @@ func main() {
 		{
 			Name:      "",
 			Version:   "",
-			Metadata:  nil,
 			Endpoints: nil,
 			Nodes: []*registry.Node{
 				{Address: "127.0.0.1:9092"},

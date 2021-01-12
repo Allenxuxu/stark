@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Allenxuxu/stark/registry/consul"
+	"github.com/Allenxuxu/stark/registry/mdns"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/rpc/server"
@@ -99,14 +99,19 @@ func main() {
 		return resp, err
 	}
 
-	rg, err := consul.NewRegistry()
-	//rg, err := mdns.NewRegistry()
+	//rg, err := consul.NewRegistry()
+	rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
 	}
 	s := server.NewServer(rg,
 		server.Name("stark.rpc.test"),
+		server.Version("v2.0.1"),
+		server.Metadata(map[string]string{
+			"server": "rpc",
+			"test":   "1",
+		}),
 		//server.Address("127.0.0.1:9091"),
 		server.UnaryServerInterceptor(interceptor),
 	)
