@@ -115,8 +115,8 @@ func TestEncodingVersion(t *testing.T) {
 		decoded string
 		encoded string
 	}{
-		{"1.0.0", "v-789c32d433d03300040000ffff02ce00ee"},
-		{"latest", "v-789cca492c492d2e01040000ffff08cc028e"},
+		{"1.0.0", "v=1.0.0"},
+		{"latest", "v=latest"},
 	}
 
 	for _, data := range testData {

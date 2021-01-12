@@ -106,7 +106,7 @@ func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) {
 		svc.Nodes = append(svc.Nodes, &registry.Node{
 			Id:       id,
 			Address:  fmt.Sprintf("%s:%d", address, e.Service.Port),
-			Metadata: decodeMetadata(e.Service.Tags),
+			Metadata: e.Service.Meta,
 		})
 	}
 

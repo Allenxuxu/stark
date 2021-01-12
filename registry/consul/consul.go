@@ -221,9 +221,8 @@ func (c *consulRegistry) Register(s *registry.Service, opts ...registry.Register
 	}
 
 	// encode the tags
-	tags := encodeMetadata(node.Metadata)
+	tags := encodeVersion(s.Version)
 	tags = append(tags, encodeEndpoints(s.Endpoints)...)
-	tags = append(tags, encodeVersion(s.Version)...)
 
 	var check *consul.AgentServiceCheck
 
@@ -261,6 +260,7 @@ func (c *consulRegistry) Register(s *registry.Service, opts ...registry.Register
 		ID:      node.Id,
 		Name:    s.Name,
 		Tags:    tags,
+		Meta:    node.Metadata,
 		Port:    port,
 		Address: host,
 		Check:   check,
@@ -356,7 +356,7 @@ func (c *consulRegistry) GetService(name string) ([]*registry.Service, error) {
 		svc.Nodes = append(svc.Nodes, &registry.Node{
 			Id:       id,
 			Address:  util.HostPort(address, s.Service.Port),
-			Metadata: decodeMetadata(s.Service.Tags),
+			Metadata: s.Service.Meta,
 		})
 	}
 
