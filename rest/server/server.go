@@ -1,0 +1,159 @@
+package server
+
+import (
+	"net"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/Allenxuxu/stark/log"
+	"github.com/Allenxuxu/stark/registry"
+)
+
+var (
+	DefaultName    = "stark.http.server"
+	DefaultVersion = time.Now().Format("2006.01.02.15.04")
+	DefaultId      = uuid.New().String()
+	DefaultAddress = ":0"
+
+	DefaultRegisterInterval = time.Second * 30
+	DefaultRegisterTTL      = time.Minute
+)
+
+type Server struct {
+	opts     Options
+	Registry registry.Registry
+	Handler  http.Handler
+	server   *http.Server
+	service  *registry.Service
+	exit     chan struct{}
+}
+
+func NewSever(rg registry.Registry, handler http.Handler, opts ...Option) *Server {
+	options := Options{
+		Name:             DefaultName,
+		Version:          DefaultVersion,
+		Id:               DefaultId,
+		Address:          DefaultAddress,
+		RegisterTTL:      DefaultRegisterTTL,
+		RegisterInterval: DefaultRegisterInterval,
+	}
+
+	for _, o := range opts {
+		o(&options)
+	}
+
+	s := &Server{
+		opts:     options,
+		Registry: rg,
+		Handler:  handler,
+		exit:     make(chan struct{}),
+	}
+
+	s.service = &registry.Service{
+		Name:    s.opts.Name,
+		Version: s.opts.Version,
+		Nodes: []*registry.Node{{
+			Id:       s.opts.Id,
+			Address:  s.opts.Address,
+			Metadata: s.opts.Metadata,
+		}},
+	}
+	return s
+}
+
+func (s *Server) Run() error {
+	s.server = &http.Server{Addr: s.opts.Address, Handler: s.Handler}
+	ln, err := net.Listen("tcp", s.opts.Address)
+	if err != nil {
+		return err
+	}
+
+	s.service.Nodes[0].Address = ln.Addr().String()
+	s.opts.Address = ln.Addr().String()
+	if err := s.register(); err != nil {
+		return err
+	}
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	go func() {
+		select {
+		case sig := <-ch:
+			log.Logf("Received signal %s", sig)
+			if err = s.Stop(); err != nil {
+				log.Error("Server stop error :%v", err)
+			}
+		case <-s.exit:
+		}
+
+		if err := s.deregister(); err != nil {
+			log.Logf("deregister error %v", err)
+		}
+	}()
+
+	log.Log("Http server listen on %s", s.opts.Address)
+	if len(s.opts.CertFile) > 0 && len(s.opts.KeyFile) > 0 {
+		err = s.server.ServeTLS(ln, s.opts.CertFile, s.opts.KeyFile)
+	} else {
+		err = s.server.Serve(ln)
+	}
+	if err != nil && err == http.ErrServerClosed {
+		return nil
+	}
+
+	return err
+}
+
+func (s *Server) Options() Options {
+	return s.opts
+}
+
+func (s *Server) Stop() error {
+	select {
+	case <-s.exit:
+		return nil
+	default:
+		close(s.exit)
+		return s.server.Close()
+	}
+}
+
+func (s *Server) register() error {
+	ttlOpt := registry.RegisterTTL(s.opts.RegisterTTL)
+	if err := s.Registry.Register(s.service, ttlOpt); err != nil {
+		return err
+	}
+	log.Logf("Registry [%s] register node: %s", s.Registry.String(), s.service.Nodes[0].Id)
+
+	if s.opts.RegisterInterval <= time.Duration(0) {
+		return nil
+	}
+
+	go func() {
+		t := time.NewTicker(s.opts.RegisterInterval)
+
+		for {
+			select {
+			case <-t.C:
+				if err := s.Registry.Register(s.service, ttlOpt); err != nil {
+					log.Log("Server register error: ", err)
+				}
+			case <-s.exit:
+				t.Stop()
+				return
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (s *Server) deregister() error {
+	log.Logf("Registry [%s] deregister node: %s", s.Registry.String(), s.service.Nodes[0].Id)
+	return s.Registry.Deregister(s.service)
+}
