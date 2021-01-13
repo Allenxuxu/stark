@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"google.golang.org/grpc/reflection"
+
 	"github.com/Allenxuxu/stark/registry/mdns"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
@@ -117,6 +119,9 @@ func main() {
 	)
 
 	rs := NewServer()
+
+	reflection.Register(s.GrpcServer())
+
 	pb.RegisterRouteGuideServer(s.GrpcServer(), rs)
 	//s.RegisterEndpoints(rs)
 

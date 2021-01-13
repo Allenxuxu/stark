@@ -96,7 +96,7 @@ func (s *Server) Run() error {
 		}
 	}()
 
-	log.Log("Http server listen on %s", s.opts.Address)
+	log.Logf("Http server listen on %s", s.opts.Address)
 	if len(s.opts.CertFile) > 0 && len(s.opts.KeyFile) > 0 {
 		err = s.server.ServeTLS(ln, s.opts.CertFile, s.opts.KeyFile)
 	} else {
