@@ -1,15 +1,13 @@
 package server
 
 import (
-	"context"
-	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/toolkit/sync"
-	"google.golang.org/grpc/reflection"
-
 	"github.com/Allenxuxu/stark/registry"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -20,7 +18,6 @@ var (
 	DefaultName             = "stark.rpc.server"
 	DefaultVersion          = time.Now().Format("2006.01.02.15.04")
 	DefaultId               = uuid.New().String()
-	DefaultRegisterCheck    = func(context.Context) error { return nil }
 	DefaultRegisterInterval = time.Second * 30
 	DefaultRegisterTTL      = time.Minute
 )
@@ -31,7 +28,6 @@ type Server struct {
 	grpcSever *grpc.Server
 	service   *registry.Service
 	exit      chan struct{}
-	sw        sync.WaitGroupWrapper
 
 	options            []grpc.ServerOption
 	streamInterceptors []grpc.StreamServerInterceptor
@@ -45,7 +41,6 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 		Address:          DefaultAddress,
 		Id:               DefaultId,
 		Version:          DefaultVersion,
-		RegisterCheck:    DefaultRegisterCheck,
 		RegisterTTL:      DefaultRegisterTTL,
 		RegisterInterval: DefaultRegisterInterval,
 	}
@@ -59,17 +54,18 @@ func NewServer(rg registry.Registry, opt ...Option) *Server {
 		registry: rg,
 		exit:     make(chan struct{}),
 	}
+
 	g.grpcSever = grpc.NewServer(opts.GrpcOpts...)
 	g.service = &registry.Service{
-		Name:      g.opts.Name,
-		Version:   g.opts.Version,
-		Endpoints: nil,
+		Name:    g.opts.Name,
+		Version: g.opts.Version,
 		Nodes: []*registry.Node{{
 			Id:       g.opts.Id,
 			Address:  g.opts.Address,
 			Metadata: g.opts.Metadata},
 		},
 	}
+
 	return g
 }
 
@@ -94,21 +90,29 @@ func (g *Server) Start() error {
 
 	g.opts.Address = listener.Addr().String()
 	g.service.Nodes[0].Address = listener.Addr().String()
-
 	if err = g.register(); err != nil {
 		return err
 	}
 
-	reflection.Register(g.grpcSever)
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	go func() {
+		select {
+		case sig := <-ch:
+			log.Logf("Received signal %s", sig)
+			if err = g.Stop(); err != nil {
+				log.Error("Server stop error :%v", err)
+			}
+		case <-g.exit:
+		}
 
-	log.Infof("%s server listen on %s", g.opts.Name, g.opts.Address)
-	if err = g.grpcSever.Serve(listener); err != nil {
-		return err
-	}
+		if err := g.deregister(); err != nil {
+			log.Logf("deregister error %v", err)
+		}
+	}()
 
-	g.sw.Wait()
-
-	return nil
+	log.Infof("RPC server listen on %s", g.opts.Address)
+	return g.grpcSever.Serve(listener)
 }
 
 func (g *Server) Stop() error {
@@ -117,11 +121,9 @@ func (g *Server) Stop() error {
 		return nil
 	default:
 		close(g.exit)
+		g.grpcSever.GracefulStop()
+		return nil
 	}
-
-	g.grpcSever.GracefulStop()
-
-	return nil
 }
 
 func (g *Server) Options() Options {
@@ -132,23 +134,20 @@ func (g *Server) String() string {
 	return "grpc"
 }
 
-func (g *Server) nodeId() string {
-	return fmt.Sprintf("%s-%s", g.opts.Name, g.opts.Id)
-}
-
 func (g *Server) register() error {
 	ttlOpt := registry.RegisterTTL(g.opts.RegisterTTL)
 	if err := g.registry.Register(g.service, ttlOpt); err != nil {
 		return err
 	}
+	log.Logf("Registry [%s] register node: %s", g.registry.String(), g.service.Nodes[0].Id)
 
-	g.sw.AddAndRun(func() {
-		t := new(time.Ticker)
-		if g.opts.RegisterInterval > time.Duration(0) {
-			t = time.NewTicker(g.opts.RegisterInterval)
-		}
+	if g.opts.RegisterInterval <= time.Duration(0) {
+		return nil
+	}
 
-	Loop:
+	go func() {
+		t := time.NewTicker(g.opts.RegisterInterval)
+
 		for {
 			select {
 			case <-t.C:
@@ -156,14 +155,16 @@ func (g *Server) register() error {
 					log.Log("Server register error: ", err)
 				}
 			case <-g.exit:
-				break Loop
+				t.Stop()
+				return
 			}
 		}
-
-		if err := g.registry.Deregister(g.service); err != nil {
-			log.Log("Server deregister error: ", err)
-		}
-	})
+	}()
 
 	return nil
+}
+
+func (g *Server) deregister() error {
+	log.Logf("Registry [%s] deregister node: %s", g.registry.String(), g.service.Nodes[0].Id)
+	return g.registry.Deregister(g.service)
 }

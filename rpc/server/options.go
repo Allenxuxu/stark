@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"time"
 
 	"google.golang.org/grpc"
@@ -14,14 +13,9 @@ type Options struct {
 	Id       string
 	Version  string
 
-	// RegisterCheck runs a check function before registering the service
-	RegisterCheck func(context.Context) error
-	// The register expiry time
-	RegisterTTL time.Duration
-	// The interval on which to register
+	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
-
-	GrpcOpts []grpc.ServerOption
+	GrpcOpts         []grpc.ServerOption
 }
 
 type Option func(*Options)
@@ -58,13 +52,6 @@ func Address(a string) Option {
 func Metadata(md map[string]string) Option {
 	return func(o *Options) {
 		o.Metadata = md
-	}
-}
-
-// RegisterCheck run func before registry service
-func RegisterCheck(fn func(context.Context) error) Option {
-	return func(o *Options) {
-		o.RegisterCheck = fn
 	}
 }
 
