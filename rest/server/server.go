@@ -26,8 +26,8 @@ var (
 
 type Server struct {
 	opts     Options
-	Registry registry.Registry
-	Handler  http.Handler
+	registry registry.Registry
+	handler  http.Handler
 	server   *http.Server
 	service  *registry.Service
 	exit     chan struct{}
@@ -49,8 +49,8 @@ func NewSever(rg registry.Registry, handler http.Handler, opts ...Option) *Serve
 
 	s := &Server{
 		opts:     options,
-		Registry: rg,
-		Handler:  handler,
+		registry: rg,
+		handler:  handler,
 		exit:     make(chan struct{}),
 	}
 
@@ -67,7 +67,7 @@ func NewSever(rg registry.Registry, handler http.Handler, opts ...Option) *Serve
 }
 
 func (s *Server) Run() error {
-	s.server = &http.Server{Addr: s.opts.Address, Handler: s.Handler}
+	s.server = &http.Server{Addr: s.opts.Address, Handler: s.handler}
 	ln, err := net.Listen("tcp", s.opts.Address)
 	if err != nil {
 		return err
@@ -123,12 +123,16 @@ func (s *Server) Stop() error {
 	}
 }
 
+func (s *Server) String() string {
+	return "http"
+}
+
 func (s *Server) register() error {
 	ttlOpt := registry.RegisterTTL(s.opts.RegisterTTL)
-	if err := s.Registry.Register(s.service, ttlOpt); err != nil {
+	if err := s.registry.Register(s.service, ttlOpt); err != nil {
 		return err
 	}
-	log.Logf("Registry [%s] register node: %s", s.Registry.String(), s.service.Nodes[0].Id)
+	log.Logf("Registry [%s] register node: %s", s.registry.String(), s.service.Nodes[0].Id)
 
 	if s.opts.RegisterInterval <= time.Duration(0) {
 		return nil
@@ -140,7 +144,7 @@ func (s *Server) register() error {
 		for {
 			select {
 			case <-t.C:
-				if err := s.Registry.Register(s.service, ttlOpt); err != nil {
+				if err := s.registry.Register(s.service, ttlOpt); err != nil {
 					log.Log("Server register error: ", err)
 				}
 			case <-s.exit:
@@ -154,6 +158,6 @@ func (s *Server) register() error {
 }
 
 func (s *Server) deregister() error {
-	log.Logf("Registry [%s] deregister node: %s", s.Registry.String(), s.service.Nodes[0].Id)
-	return s.Registry.Deregister(s.service)
+	log.Logf("Registry [%s] deregister node: %s", s.registry.String(), s.service.Nodes[0].Id)
+	return s.registry.Deregister(s.service)
 }
