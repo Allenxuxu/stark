@@ -1,23 +1,21 @@
-package selector
+package registry
 
 import (
 	"testing"
-
-	"github.com/Allenxuxu/stark/registry"
 )
 
 func TestFilterEndpoint(t *testing.T) {
 	testData := []struct {
-		services []*registry.Service
+		services []*Service
 		endpoint string
 		count    int
 	}{
 		{
-			services: []*registry.Service{
+			services: []*Service{
 				{
 					Name:    "test",
 					Version: "1.0.0",
-					Endpoints: []*registry.Endpoint{
+					Endpoints: []*Endpoint{
 						{
 							Name: "Foo.Bar",
 						},
@@ -26,7 +24,7 @@ func TestFilterEndpoint(t *testing.T) {
 				{
 					Name:    "test",
 					Version: "1.1.0",
-					Endpoints: []*registry.Endpoint{
+					Endpoints: []*Endpoint{
 						{
 							Name: "Baz.Bar",
 						},
@@ -37,11 +35,11 @@ func TestFilterEndpoint(t *testing.T) {
 			count:    1,
 		},
 		{
-			services: []*registry.Service{
+			services: []*Service{
 				{
 					Name:    "test",
 					Version: "1.0.0",
-					Endpoints: []*registry.Endpoint{
+					Endpoints: []*Endpoint{
 						{
 							Name: "Foo.Bar",
 						},
@@ -50,7 +48,7 @@ func TestFilterEndpoint(t *testing.T) {
 				{
 					Name:    "test",
 					Version: "1.1.0",
-					Endpoints: []*registry.Endpoint{
+					Endpoints: []*Endpoint{
 						{
 							Name: "Foo.Bar",
 						},
@@ -89,16 +87,16 @@ func TestFilterEndpoint(t *testing.T) {
 
 func TestFilterLabel(t *testing.T) {
 	testData := []struct {
-		services []*registry.Service
+		services []*Service
 		label    [2]string
 		count    int
 	}{
 		{
-			services: []*registry.Service{
+			services: []*Service{
 				{
 					Name:    "test",
 					Version: "1.0.0",
-					Nodes: []*registry.Node{
+					Nodes: []*Node{
 						{
 							Id:      "test-1",
 							Address: "localhost",
@@ -111,7 +109,7 @@ func TestFilterLabel(t *testing.T) {
 				{
 					Name:    "test",
 					Version: "1.1.0",
-					Nodes: []*registry.Node{
+					Nodes: []*Node{
 						{
 							Id:      "test-2",
 							Address: "localhost",
@@ -126,11 +124,11 @@ func TestFilterLabel(t *testing.T) {
 			count: 1,
 		},
 		{
-			services: []*registry.Service{
+			services: []*Service{
 				{
 					Name:    "test",
 					Version: "1.0.0",
-					Nodes: []*registry.Node{
+					Nodes: []*Node{
 						{
 							Id:      "test-1",
 							Address: "localhost",
@@ -140,7 +138,7 @@ func TestFilterLabel(t *testing.T) {
 				{
 					Name:    "test",
 					Version: "1.1.0",
-					Nodes: []*registry.Node{
+					Nodes: []*Node{
 						{
 							Id:      "test-2",
 							Address: "localhost",
@@ -181,12 +179,12 @@ func TestFilterLabel(t *testing.T) {
 
 func TestFilterVersion(t *testing.T) {
 	testData := []struct {
-		services []*registry.Service
+		services []*Service
 		version  string
 		count    int
 	}{
 		{
-			services: []*registry.Service{
+			services: []*Service{
 				{
 					Name:    "test",
 					Version: "1.0.0",
@@ -200,7 +198,7 @@ func TestFilterVersion(t *testing.T) {
 			count:   1,
 		},
 		{
-			services: []*registry.Service{
+			services: []*Service{
 				{
 					Name:    "test",
 					Version: "1.0.0",

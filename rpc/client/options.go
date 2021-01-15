@@ -32,7 +32,7 @@ func StreamClientInterceptors(u grpc.StreamClientInterceptor) Option {
 	}
 }
 
-func DialOption(do ...grpc.DialOption) Option {
+func GrpcDialOption(do ...grpc.DialOption) Option {
 	return func(o *Options) {
 		o.GrpcOpts = append(o.GrpcOpts, do...)
 	}

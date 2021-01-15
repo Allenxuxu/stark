@@ -3,7 +3,6 @@ module github.com/Allenxuxu/stark
 go 1.15
 
 require (
-	github.com/Allenxuxu/toolkit v0.0.0-20201014055025-62998795ea16
 	github.com/BurntSushi/toml v0.3.1
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect

@@ -83,14 +83,14 @@ func newServer(rg rg.Registry) *server.Server {
 
 func newClient(rg rg.Registry) *client.Client {
 	s, err := registry.NewSelector(rg,
-		selector.WithBalancerName(balancer.RoundRobin),
+		selector.BalancerName(balancer.RoundRobin),
 	)
 	if err != nil {
 		panic(err)
 	}
 
 	c, err := client.NewClient(serverName, s,
-		client.DialOption(
+		client.GrpcDialOption(
 			grpc.WithInsecure(),
 		),
 	)

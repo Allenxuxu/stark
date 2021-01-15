@@ -73,7 +73,7 @@ func TestRegistrySelectorFilter(t *testing.T) {
 	version := "1.0.0"
 	r, err := memory.NewRegistry(memory.Services(testData))
 	assert.Nil(t, err)
-	cache, err := NewSelector(r, selector.WithFilter(selector.FilterVersion(version)))
+	cache, err := NewSelector(r, selector.Filter(registry.FilterVersion(version)))
 	assert.Nil(t, err)
 
 	service, err := cache.GetService("foo")

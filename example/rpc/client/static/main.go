@@ -30,11 +30,11 @@ func main() {
 
 	s := static.NewSelector(
 		service,
-		selector.WithBalancerName(balancer.Random),
+		selector.BalancerName(balancer.Random),
 	)
 
 	client, err := client.NewClient("stark.rpc.test", s,
-		client.DialOption(
+		client.GrpcDialOption(
 			grpc.WithInsecure(),
 			grpc.WithDefaultCallOptions(
 				grpc.MaxCallRecvMsgSize(1024*1024),

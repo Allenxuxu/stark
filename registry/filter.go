@@ -1,17 +1,13 @@
-package selector
-
-import (
-	"github.com/Allenxuxu/stark/registry"
-)
+package registry
 
 // Filter is used to filter a service during the selection process
-type Filter func([]*registry.Service) []*registry.Service
+type Filter func([]*Service) []*Service
 
 // FilterEndpoint is an endpoint based Next Filter which will
 // only return services with the endpoint specified.
 func FilterEndpoint(name string) Filter {
-	return func(old []*registry.Service) []*registry.Service {
-		var services []*registry.Service
+	return func(old []*Service) []*Service {
+		var services []*Service
 
 		for _, service := range old {
 			for _, ep := range service.Endpoints {
@@ -29,12 +25,12 @@ func FilterEndpoint(name string) Filter {
 // FilterLabel is a label based Next Filter which will
 // only return services with the label specified.
 func FilterLabel(key, val string) Filter {
-	return func(old []*registry.Service) []*registry.Service {
-		var services []*registry.Service
+	return func(old []*Service) []*Service {
+		var services []*Service
 
 		for _, service := range old {
-			serv := new(registry.Service)
-			var nodes []*registry.Node
+			serv := new(Service)
+			var nodes []*Node
 
 			for _, node := range service.Nodes {
 				if node.Metadata == nil {
@@ -62,8 +58,8 @@ func FilterLabel(key, val string) Filter {
 // FilterVersion is a version based Next Filter which will
 // only return services with the version specified.
 func FilterVersion(version string) Filter {
-	return func(old []*registry.Service) []*registry.Service {
-		var services []*registry.Service
+	return func(old []*Service) []*Service {
+		var services []*Service
 
 		for _, service := range old {
 			if service.Version == version {

@@ -24,14 +24,14 @@ func main() {
 	}
 
 	s, err := registry.NewSelector(rg,
-		selector.WithBalancerName(balancer.RoundRobin),
+		selector.BalancerName(balancer.RoundRobin),
 	)
 	if err != nil {
 		panic(err)
 	}
 
 	client, err := client.NewClient("stark.rpc.test", s,
-		client.DialOption(
+		client.GrpcDialOption(
 			grpc.WithInsecure(),
 		),
 	)
