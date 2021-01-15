@@ -1,4 +1,4 @@
-package server
+package rpc
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestUnaryServerInterceptor(t *testing.T) {
-	opts := Options{}
+	opts := ServerOptions{}
 	f := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		return nil, nil
 	}
@@ -24,7 +24,7 @@ func TestUnaryServerInterceptor(t *testing.T) {
 }
 
 func TestStreamServerInterceptor(t *testing.T) {
-	opts := Options{}
+	opts := ServerOptions{}
 	f := func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		return nil
 	}
@@ -39,7 +39,7 @@ func TestStreamServerInterceptor(t *testing.T) {
 }
 
 func TestGrpcOptions(t *testing.T) {
-	opts := Options{}
+	opts := ServerOptions{}
 	n := 10
 
 	f1 := func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {

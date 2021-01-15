@@ -1,4 +1,4 @@
-package server
+package rpc
 
 import (
 	"net"
@@ -23,7 +23,7 @@ var (
 )
 
 type Server struct {
-	opts      *Options
+	opts      *ServerOptions
 	registry  registry.Registry
 	grpcSever *grpc.Server
 	service   *registry.Service
@@ -34,8 +34,8 @@ type Server struct {
 	unaryInterceptors  []grpc.UnaryServerInterceptor
 }
 
-func NewServer(rg registry.Registry, opt ...Option) *Server {
-	opts := Options{
+func NewServer(rg registry.Registry, opt ...ServerOption) *Server {
+	opts := ServerOptions{
 		Metadata:         nil,
 		Name:             DefaultName,
 		Address:          DefaultAddress,
@@ -126,7 +126,7 @@ func (g *Server) Stop() error {
 	}
 }
 
-func (g *Server) Options() Options {
+func (g *Server) Options() ServerOptions {
 	return *g.opts
 }
 

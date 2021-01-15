@@ -1,4 +1,4 @@
-package server
+package rpc
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Options struct {
+type ServerOptions struct {
 	Metadata map[string]string
 	Name     string
 	Address  string
@@ -18,67 +18,67 @@ type Options struct {
 	GrpcOpts         []grpc.ServerOption
 }
 
-type Option func(*Options)
+type ServerOption func(*ServerOptions)
 
 // Server name
-func Name(n string) Option {
-	return func(o *Options) {
+func Name(n string) ServerOption {
+	return func(o *ServerOptions) {
 		o.Name = n
 	}
 }
 
 // Id Unique server id
-func Id(id string) Option {
-	return func(o *Options) {
+func Id(id string) ServerOption {
+	return func(o *ServerOptions) {
 		o.Id = id
 	}
 }
 
 // Version of the service
-func Version(v string) Option {
-	return func(o *Options) {
+func Version(v string) ServerOption {
+	return func(o *ServerOptions) {
 		o.Version = v
 	}
 }
 
 // Address to bind to - host:port
-func Address(a string) Option {
-	return func(o *Options) {
+func Address(a string) ServerOption {
+	return func(o *ServerOptions) {
 		o.Address = a
 	}
 }
 
 // Metadata associated with the server
-func Metadata(md map[string]string) Option {
-	return func(o *Options) {
+func Metadata(md map[string]string) ServerOption {
+	return func(o *ServerOptions) {
 		o.Metadata = md
 	}
 }
 
 // RegisterTTL register the service with a TTL
-func RegisterTTL(t time.Duration) Option {
-	return func(o *Options) {
+func RegisterTTL(t time.Duration) ServerOption {
+	return func(o *ServerOptions) {
 		o.RegisterTTL = t
 	}
 }
 
 // RegisterInterval register the service with at interval
-func RegisterInterval(t time.Duration) Option {
-	return func(o *Options) {
+func RegisterInterval(t time.Duration) ServerOption {
+	return func(o *ServerOptions) {
 		o.RegisterInterval = t
 	}
 }
 
 // UnaryServerInterceptor to be used to configure gRPC options
-func UnaryServerInterceptor(u grpc.UnaryServerInterceptor) Option {
-	return func(o *Options) {
+func UnaryServerInterceptor(u grpc.UnaryServerInterceptor) ServerOption {
+	return func(o *ServerOptions) {
 		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainUnaryInterceptor(u))
 	}
 }
 
 // StreamServerInterceptor to be used to configure gRPC options
-func StreamServerInterceptor(u grpc.StreamServerInterceptor) Option {
-	return func(o *Options) {
+func StreamServerInterceptor(u grpc.StreamServerInterceptor) ServerOption {
+	return func(o *ServerOptions) {
 		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainStreamInterceptor(u))
 	}
 }

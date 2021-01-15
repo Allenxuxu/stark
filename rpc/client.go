@@ -1,4 +1,4 @@
-package client
+package rpc
 
 import (
 	"context"
@@ -14,15 +14,15 @@ var (
 )
 
 type Client struct {
-	opts     *Options
+	opts     *ClientOptions
 	name     string
 	selector selector.Selector
 
 	conn *grpc.ClientConn
 }
 
-func NewClient(name string, s selector.Selector, opt ...Option) (*Client, error) {
-	opts := Options{
+func NewClient(name string, s selector.Selector, opt ...ClientOption) (*Client, error) {
+	opts := ClientOptions{
 		Timeout: DefaultTimeout,
 	}
 

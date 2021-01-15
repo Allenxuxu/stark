@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Allenxuxu/stark/rpc"
+
 	"github.com/Allenxuxu/stark/registry/mdns"
 
 	rg "github.com/Allenxuxu/stark/registry"
 	"github.com/Allenxuxu/stark/registry/memory"
-	"github.com/Allenxuxu/stark/rpc/client"
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/stark/rpc/client/selector/registry"
-	"github.com/Allenxuxu/stark/rpc/server"
 	pb "github.com/Allenxuxu/stark/test/routeguide"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -70,9 +70,9 @@ func testServer(t *testing.T, registry rg.Registry) {
 	}
 }
 
-func newServer(rg rg.Registry) *server.Server {
-	s := server.NewServer(rg,
-		server.Name(serverName),
+func newServer(rg rg.Registry) *rpc.Server {
+	s := rpc.NewServer(rg,
+		rpc.Name(serverName),
 	)
 
 	rs := &routeGuideServer{}
@@ -81,7 +81,7 @@ func newServer(rg rg.Registry) *server.Server {
 	return s
 }
 
-func newClient(rg rg.Registry) *client.Client {
+func newClient(rg rg.Registry) *rpc.Client {
 	s, err := registry.NewSelector(rg,
 		selector.BalancerName(balancer.RoundRobin),
 	)
@@ -89,8 +89,8 @@ func newClient(rg rg.Registry) *client.Client {
 		panic(err)
 	}
 
-	c, err := client.NewClient(serverName, s,
-		client.GrpcDialOption(
+	c, err := rpc.NewClient(serverName, s,
+		rpc.GrpcDialOption(
 			grpc.WithInsecure(),
 		),
 	)

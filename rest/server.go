@@ -1,4 +1,4 @@
-package server
+package rest
 
 import (
 	"net"
@@ -25,7 +25,7 @@ var (
 )
 
 type Server struct {
-	opts     Options
+	opts     ServerOptions
 	registry registry.Registry
 	handler  http.Handler
 	server   *http.Server
@@ -33,8 +33,8 @@ type Server struct {
 	exit     chan struct{}
 }
 
-func NewSever(rg registry.Registry, handler http.Handler, opts ...Option) *Server {
-	options := Options{
+func NewSever(rg registry.Registry, handler http.Handler, opts ...ServerOption) *Server {
+	options := ServerOptions{
 		Name:             DefaultName,
 		Version:          DefaultVersion,
 		Id:               DefaultId,
@@ -66,7 +66,7 @@ func NewSever(rg registry.Registry, handler http.Handler, opts ...Option) *Serve
 	return s
 }
 
-func (s *Server) Run() error {
+func (s *Server) Start() error {
 	s.server = &http.Server{Addr: s.opts.Address, Handler: s.handler}
 	ln, err := net.Listen("tcp", s.opts.Address)
 	if err != nil {
@@ -109,7 +109,7 @@ func (s *Server) Run() error {
 	return err
 }
 
-func (s *Server) Options() Options {
+func (s *Server) Options() ServerOptions {
 	return s.opts
 }
 

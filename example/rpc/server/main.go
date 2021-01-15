@@ -10,12 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Allenxuxu/stark/rpc"
+
 	"google.golang.org/grpc/reflection"
 
 	"github.com/Allenxuxu/stark/registry/mdns"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/rpc/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 )
@@ -107,15 +108,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	s := server.NewServer(rg,
-		server.Name("stark.rpc.test"),
-		server.Version("v2.0.1"),
-		server.Metadata(map[string]string{
+	s := rpc.NewServer(rg,
+		rpc.Name("stark.rpc.test"),
+		rpc.Version("v2.0.1"),
+		rpc.Metadata(map[string]string{
 			"server": "rpc",
 			"test":   "1",
 		}),
 		//server.Address("127.0.0.1:9091"),
-		server.UnaryServerInterceptor(interceptor),
+		rpc.UnaryServerInterceptor(interceptor),
 	)
 
 	rs := NewServer()

@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Allenxuxu/stark/internal/env"
 	"github.com/go-log/log"
 	golog "github.com/go-log/log/log"
+)
+
+const (
+	StarkLogLevel = "STARK_LOG_LEVEL"
 )
 
 type Level int
@@ -32,7 +35,7 @@ var (
 )
 
 func init() {
-	switch os.Getenv(env.StarkLogLevel) {
+	switch os.Getenv(StarkLogLevel) {
 	case "trace":
 		level = LevelTrace
 	case "debug":

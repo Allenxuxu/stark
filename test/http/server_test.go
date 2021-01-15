@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Allenxuxu/stark/rest"
+
 	"github.com/Allenxuxu/stark/registry/memory"
-	"github.com/Allenxuxu/stark/rest/server"
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
@@ -26,10 +27,10 @@ func TestServer(t *testing.T) {
 		})
 	})
 	name := "stark.http.test"
-	s := server.NewSever(rg, r, server.Name(name))
+	s := rest.NewSever(rg, r, rest.Name(name))
 
 	go func() {
-		if err := s.Run(); err != nil {
+		if err := s.Start(); err != nil {
 			panic(err)
 		}
 	}()

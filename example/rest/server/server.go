@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Allenxuxu/stark/registry/consul"
-	"github.com/Allenxuxu/stark/rest/server"
+	"github.com/Allenxuxu/stark/rest"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,9 +21,11 @@ func main() {
 		})
 	})
 
-	s := server.NewSever(rg, r)
+	s := rest.NewSever(rg, r,
+		rest.Name("stark.http.test"),
+	)
 
-	if err := s.Run(); err != nil {
+	if err := s.Start(); err != nil {
 		panic(err)
 	}
 }
