@@ -1,4 +1,4 @@
-package test
+package rpc
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/Allenxuxu/stark/test/routeguide"
+	pb "github.com/Allenxuxu/stark/test/rpc/routeguide"
 )
 
 type routeGuideServer struct{}

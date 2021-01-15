@@ -4,13 +4,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Allenxuxu/stark/rest"
-
+	rg "github.com/Allenxuxu/stark/registry"
 	"github.com/Allenxuxu/stark/registry/memory"
+	"github.com/Allenxuxu/stark/rest"
+	"github.com/Allenxuxu/stark/rest/client/selector/registry"
 	"github.com/gin-gonic/gin"
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 )
+
+var name = "stark.http.test"
 
 func TestServer(t *testing.T) {
 	rg, err := memory.NewRegistry()
@@ -18,15 +20,12 @@ func TestServer(t *testing.T) {
 		panic(err)
 	}
 
-	gin.SetMode(gin.DebugMode)
-
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
-	name := "stark.http.test"
 	s := rest.NewSever(rg, r, rest.Name(name))
 
 	go func() {
@@ -37,17 +36,28 @@ func TestServer(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	client := resty.New()
-	services, err := rg.GetService(name)
-	assert.Nil(t, err)
-	assert.Equal(t, len(services), 1)
-	assert.Equal(t, services[0].Name, name)
-
-	addr := services[0].Nodes[0].Address
-	t.Log(addr)
-	resp, err := client.R().Get("http://" + addr + "/ping")
-	assert.Nil(t, err)
-	t.Log(resp)
+	client := newClient(rg)
+	for i := 0; i < 10; i++ {
+		request, err := client.Request()
+		assert.Nil(t, err)
+		resp, err := request.Get("/ping")
+		assert.Nil(t, err)
+		t.Log(resp)
+	}
 
 	assert.Nil(t, s.Stop())
+}
+
+func newClient(rg rg.Registry) *rest.Client {
+	s, err := registry.NewSelector(rg)
+	if err != nil {
+		panic(err)
+	}
+
+	c, err := rest.NewClient(name, s)
+	if err != nil {
+		panic(err)
+	}
+
+	return c
 }

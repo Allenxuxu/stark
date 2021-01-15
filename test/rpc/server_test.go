@@ -1,4 +1,4 @@
-package test
+package rpc
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/stark/rpc/client/selector/registry"
-	pb "github.com/Allenxuxu/stark/test/routeguide"
+	pb "github.com/Allenxuxu/stark/test/rpc/routeguide"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 )

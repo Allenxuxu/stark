@@ -2,14 +2,14 @@ package main
 
 import (
 	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/stark/registry/consul"
+	"github.com/Allenxuxu/stark/registry/mdns"
 	"github.com/Allenxuxu/stark/rest"
 	"github.com/Allenxuxu/stark/rest/client/selector/registry"
 )
 
 func main() {
-	rg, err := consul.NewRegistry()
-	//rg, err := mdns.NewRegistry()
+	//rg, err := consul.NewRegistry()
+	rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)

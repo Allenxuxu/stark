@@ -5,8 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Allenxuxu/stark/log"
-
 	"github.com/Allenxuxu/stark/rest/client/selector"
 	"github.com/go-resty/resty/v2"
 )
@@ -33,10 +31,6 @@ func NewClient(name string, s selector.Selector, opt ...ClientOption) (*Client, 
 		o(&opts)
 	}
 
-	if opts.Timeout == 0 {
-		opts.Timeout = DefaultTimeout
-	}
-
 	client := &Client{
 		opts:     &opts,
 		name:     name,
@@ -53,16 +47,27 @@ func (c *Client) Request() (*resty.Request, error) {
 		return nil, err
 	}
 
+	return c.nextClient(node.Address).R(), nil
+}
+
+func (c *Client) nextClient(address string) *resty.Client {
 	c.mu.RLock()
-	client, ok := c.clients[node.Address]
-	if !ok {
-		client = resty.New()
-		client.SetHostURL(fmt.Sprintf("http://%s", node.Address))
-		client.SetTimeout(c.opts.Timeout)
-		c.clients[node.Address] = client
-	}
+	client, ok := c.clients[address]
 	c.mu.RUnlock()
 
-	log.Info(node.Address)
-	return client.R(), nil
+	if !ok {
+		client = c.newRestyClient(address)
+
+		c.mu.Lock()
+		c.clients[address] = client
+		c.mu.Unlock()
+	}
+
+	return client
+}
+
+func (c *Client) newRestyClient(address string) *resty.Client {
+	return resty.New().
+		SetHostURL(fmt.Sprintf("http://%s", address)).
+		SetTimeout(c.opts.Timeout)
 }
