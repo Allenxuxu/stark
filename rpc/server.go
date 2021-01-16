@@ -99,7 +99,7 @@ func (g *Server) Start() error {
 	go func() {
 		select {
 		case sig := <-ch:
-			log.Logf("Received signal %s", sig)
+			log.Infof("Received signal %s", sig)
 			if err = g.Stop(); err != nil {
 				log.Error("Server stop error :%v", err)
 			}
@@ -107,7 +107,7 @@ func (g *Server) Start() error {
 		}
 
 		if err := g.deregister(); err != nil {
-			log.Logf("deregister error %v", err)
+			log.Errorf("deregister error %v", err)
 		}
 	}()
 
@@ -139,7 +139,7 @@ func (g *Server) register() error {
 	if err := g.registry.Register(g.service, ttlOpt); err != nil {
 		return err
 	}
-	log.Logf("Registry [%s] register node: %s", g.registry.String(), g.service.Nodes[0].Id)
+	log.Infof("Registry [%s] register node: %s", g.registry.String(), g.service.Nodes[0].Id)
 
 	if g.opts.RegisterInterval <= time.Duration(0) {
 		return nil
@@ -152,7 +152,7 @@ func (g *Server) register() error {
 			select {
 			case <-t.C:
 				if err := g.registry.Register(g.service, ttlOpt); err != nil {
-					log.Log("Server register error: ", err)
+					log.Errorf("Server register error: %v", err)
 				}
 			case <-g.exit:
 				t.Stop()
@@ -165,6 +165,6 @@ func (g *Server) register() error {
 }
 
 func (g *Server) deregister() error {
-	log.Logf("Registry [%s] deregister node: %s", g.registry.String(), g.service.Nodes[0].Id)
+	log.Infof("Registry [%s] deregister node: %s", g.registry.String(), g.service.Nodes[0].Id)
 	return g.registry.Deregister(g.service)
 }

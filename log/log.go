@@ -35,6 +35,8 @@ var (
 )
 
 func init() {
+	prefix = "[stark]"
+
 	switch os.Getenv(StarkLogLevel) {
 	case "trace":
 		level = LevelTrace

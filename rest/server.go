@@ -84,19 +84,19 @@ func (s *Server) Start() error {
 	go func() {
 		select {
 		case sig := <-ch:
-			log.Logf("Received signal %s", sig)
+			log.Infof("Received signal %s", sig)
 			if err = s.Stop(); err != nil {
-				log.Error("Server stop error :%v", err)
+				log.Errorf("Server stop error :%v", err)
 			}
 		case <-s.exit:
 		}
 
 		if err := s.deregister(); err != nil {
-			log.Logf("deregister error %v", err)
+			log.Errorf("deregister error %v", err)
 		}
 	}()
 
-	log.Logf("Http server listen on %s", s.opts.Address)
+	log.Infof("Http server listen on %s", s.opts.Address)
 	if len(s.opts.CertFile) > 0 && len(s.opts.KeyFile) > 0 {
 		err = s.server.ServeTLS(ln, s.opts.CertFile, s.opts.KeyFile)
 	} else {
@@ -132,7 +132,7 @@ func (s *Server) register() error {
 	if err := s.registry.Register(s.service, ttlOpt); err != nil {
 		return err
 	}
-	log.Logf("Registry [%s] register node: %s", s.registry.String(), s.service.Nodes[0].Id)
+	log.Infof("Registry [%s] register node: %s", s.registry.String(), s.service.Nodes[0].Id)
 
 	if s.opts.RegisterInterval <= time.Duration(0) {
 		return nil
@@ -145,7 +145,7 @@ func (s *Server) register() error {
 			select {
 			case <-t.C:
 				if err := s.registry.Register(s.service, ttlOpt); err != nil {
-					log.Log("Server register error: ", err)
+					log.Errorf("Server register error: %v", err)
 				}
 			case <-s.exit:
 				t.Stop()
@@ -158,6 +158,6 @@ func (s *Server) register() error {
 }
 
 func (s *Server) deregister() error {
-	log.Logf("Registry [%s] deregister node: %s", s.registry.String(), s.service.Nodes[0].Id)
+	log.Infof("Registry [%s] deregister node: %s", s.registry.String(), s.service.Nodes[0].Id)
 	return s.registry.Deregister(s.service)
 }
