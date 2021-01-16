@@ -1,6 +1,7 @@
 # stark
 
 [![Github Actions](https://github.com/Allenxuxu/gev/workflows/CI/badge.svg)](https://github.com/Allenxuxu/stark/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Allenxuxu/stark)](https://goreportcard.com/report/github.com/Allenxuxu/stark)
 [![LICENSE](https://img.shields.io/badge/LICENSE-MIT-blue)](https://github.com/Allenxuxu/stark/blob/master/LICENSE)
 
 > stark 命名源自漫威 Tony Stark
