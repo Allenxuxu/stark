@@ -10,26 +10,23 @@ import (
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:    "service",
-		Aliases: []string{"s"},
-		Usage:   "query stark service",
+		Name:      "service",
+		Aliases:   []string{"s"},
+		Usage:     "query stark service",
+		UsageText: "stark service -registry consul -registry_addr 127.0.0.1:8500 {service name}",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "registry",
 				Usage:   "registry name [mdns,etcd,consul]",
 				Value:   "mdns",
+				Aliases: []string{"r"},
 				EnvVars: []string{"STARK_CTL_REGISTRY"},
 			},
 			&cli.StringFlag{
 				Name:    "registry_addr",
 				Usage:   "registry host:port",
+				Aliases: []string{"ra"},
 				EnvVars: []string{"STARK_CTL_REGISTRY_ADDR"},
-			},
-			&cli.StringFlag{
-				Name:     "name",
-				Usage:    "service name",
-				EnvVars:  []string{"STARK_CTL_NAME"},
-				Required: true,
 			},
 		},
 		Action: serviceAction,
@@ -39,7 +36,7 @@ func Command() *cli.Command {
 func serviceAction(c *cli.Context) error {
 	registry := c.String("registry")
 	registryAddr := c.String("registry_addr")
-	name := c.String("name")
+	name := c.Args().First()
 
 	rg, err := newRegistry(registry, registryAddr)
 	if err != nil {
