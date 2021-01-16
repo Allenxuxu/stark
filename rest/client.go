@@ -25,6 +25,7 @@ type Client struct {
 func NewClient(name string, s selector.Selector, opt ...ClientOption) (*Client, error) {
 	opts := ClientOptions{
 		Timeout: DefaultTimeout,
+		Scheme:  "http",
 	}
 
 	for _, o := range opt {
@@ -68,6 +69,6 @@ func (c *Client) nextClient(address string) *resty.Client {
 
 func (c *Client) newRestyClient(address string) *resty.Client {
 	return resty.New().
-		SetHostURL(fmt.Sprintf("http://%s", address)).
+		SetHostURL(fmt.Sprintf("%s://%s", c.opts.Scheme, address)).
 		SetTimeout(c.opts.Timeout)
 }
