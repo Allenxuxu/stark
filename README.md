@@ -1,5 +1,8 @@
 # stark
 
+[![Github Actions](https://github.com/Allenxuxu/gev/workflows/CI/badge.svg)](https://github.com/Allenxuxu/stark/actions)
+[![LICENSE](https://img.shields.io/badge/LICENSE-MIT-blue)](https://github.com/Allenxuxu/stark/blob/master/LICENSE)
+
 > stark 命名源自漫威 Tony Stark
 
 一个用于构建分布式系统的工具集或者轻框架，支持 grpc 和 http ，支持多种注册中心 consul ，etcd , mdns 等。
