@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Allenxuxu/stark"
 	"github.com/Allenxuxu/stark/registry/mdns"
 	"github.com/Allenxuxu/stark/rest"
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,7 @@ func main() {
 		})
 	})
 
-	s := rest.NewSever(rg, r,
+	s := stark.NewRestServer(rg, r,
 		rest.Name("stark.http.test"),
 	)
 

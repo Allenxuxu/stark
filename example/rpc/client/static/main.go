@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Allenxuxu/stark"
+
 	"github.com/Allenxuxu/stark/rpc"
 
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
@@ -34,7 +36,7 @@ func main() {
 		selector.BalancerName(balancer.Random),
 	)
 
-	client, err := rpc.NewClient("stark.rpc.test", s,
+	client, err := stark.NewRPCClient("stark.rpc.test", s,
 		rpc.GrpcDialOption(
 			grpc.WithInsecure(),
 			grpc.WithDefaultCallOptions(

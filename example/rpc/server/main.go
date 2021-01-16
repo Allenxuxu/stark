@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/peer"
+
+	"github.com/Allenxuxu/stark"
 
 	"github.com/Allenxuxu/stark/rpc"
 
@@ -17,8 +18,6 @@ import (
 	"github.com/Allenxuxu/stark/registry/mdns"
 
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/peer"
 )
 
 type routeGuideServer struct{}
@@ -92,30 +91,30 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 	}
 }
 
+func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	st := time.Now()
+	resp, err = handler(ctx, req)
+
+	p, _ := peer.FromContext(ctx)
+	log.Printf("method: %s time: %v, peer : %s\n", info.FullMethod, time.Since(st), p.Addr)
+	return resp, err
+}
+
 func main() {
-	interceptor := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		st := time.Now()
-		resp, err = handler(ctx, req)
-
-		p, _ := peer.FromContext(ctx)
-		log.Printf("method: %s time: %v, peer : %s\n", info.FullMethod, time.Since(st), p.Addr)
-		return resp, err
-	}
-
 	//rg, err := consul.NewRegistry()
 	rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
 	}
-	s := rpc.NewServer(rg,
+
+	s := stark.NewRPCServer(rg,
 		rpc.Name("stark.rpc.test"),
 		rpc.Version("v2.0.1"),
 		rpc.Metadata(map[string]string{
 			"server": "rpc",
 			"test":   "1",
 		}),
-		//server.Address("127.0.0.1:9091"),
 		rpc.UnaryServerInterceptor(interceptor),
 	)
 
@@ -124,18 +123,6 @@ func main() {
 	reflection.Register(s.GrpcServer())
 
 	pb.RegisterRouteGuideServer(s.GrpcServer(), rs)
-	//s.RegisterEndpoints(rs)
-
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
-
-	go func() {
-		<-ch
-		fmt.Println("stop")
-		if err := s.Stop(); err != nil {
-			panic(err)
-		}
-	}()
 
 	if err := s.Start(); err != nil {
 		panic(err)

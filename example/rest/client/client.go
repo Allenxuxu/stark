@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/Allenxuxu/stark"
 	"github.com/Allenxuxu/stark/log"
 	"github.com/Allenxuxu/stark/registry/mdns"
-	"github.com/Allenxuxu/stark/rest"
 	"github.com/Allenxuxu/stark/rest/client/selector/registry"
 )
 
@@ -20,7 +20,7 @@ func main() {
 		panic(err)
 	}
 
-	c, err := rest.NewClient("stark.http.test", s)
+	c, err := stark.NewRestClient("stark.http.test", s)
 	if err != nil {
 		panic(err)
 	}

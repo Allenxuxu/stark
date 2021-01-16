@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Allenxuxu/stark/rpc"
-
-	"github.com/Allenxuxu/stark/registry/consul"
-
+	"github.com/Allenxuxu/stark"
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
+	"github.com/Allenxuxu/stark/registry/mdns"
+	"github.com/Allenxuxu/stark/rpc"
 	"github.com/Allenxuxu/stark/rpc/client/balancer"
 	"github.com/Allenxuxu/stark/rpc/client/selector"
 	"github.com/Allenxuxu/stark/rpc/client/selector/registry"
@@ -17,8 +16,8 @@ import (
 )
 
 func main() {
-	rg, err := consul.NewRegistry()
-	//rg, err := mdns.NewRegistry()
+	//rg, err := consul.NewRegistry()
+	rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
@@ -31,7 +30,7 @@ func main() {
 		panic(err)
 	}
 
-	client, err := rpc.NewClient("stark.rpc.test", s,
+	client, err := stark.NewRPCClient("stark.rpc.test", s,
 		rpc.GrpcDialOption(
 			grpc.WithInsecure(),
 		),
