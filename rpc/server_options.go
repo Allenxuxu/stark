@@ -70,15 +70,15 @@ func RegisterInterval(t time.Duration) ServerOption {
 }
 
 // UnaryServerInterceptor to be used to configure gRPC options
-func UnaryServerInterceptor(u grpc.UnaryServerInterceptor) ServerOption {
+func UnaryServerInterceptor(u ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(o *ServerOptions) {
-		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainUnaryInterceptor(u))
+		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainUnaryInterceptor(u...))
 	}
 }
 
 // StreamServerInterceptor to be used to configure gRPC options
-func StreamServerInterceptor(u grpc.StreamServerInterceptor) ServerOption {
+func StreamServerInterceptor(u ...grpc.StreamServerInterceptor) ServerOption {
 	return func(o *ServerOptions) {
-		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainStreamInterceptor(u))
+		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainStreamInterceptor(u...))
 	}
 }

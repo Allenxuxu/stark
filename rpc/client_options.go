@@ -20,15 +20,15 @@ func Timeout(t time.Duration) ClientOption {
 	}
 }
 
-func UnaryClientInterceptor(u grpc.UnaryClientInterceptor) ClientOption {
+func UnaryClientInterceptor(u ...grpc.UnaryClientInterceptor) ClientOption {
 	return func(o *ClientOptions) {
-		o.GrpcOpts = append(o.GrpcOpts, grpc.WithChainUnaryInterceptor(u))
+		o.GrpcOpts = append(o.GrpcOpts, grpc.WithChainUnaryInterceptor(u...))
 	}
 }
 
-func StreamClientInterceptors(u grpc.StreamClientInterceptor) ClientOption {
+func StreamClientInterceptors(u ...grpc.StreamClientInterceptor) ClientOption {
 	return func(o *ClientOptions) {
-		o.GrpcOpts = append(o.GrpcOpts, grpc.WithChainStreamInterceptor(u))
+		o.GrpcOpts = append(o.GrpcOpts, grpc.WithChainStreamInterceptor(u...))
 	}
 }
 

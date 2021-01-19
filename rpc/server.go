@@ -7,6 +7,8 @@ import (
 	"syscall"
 	"time"
 
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+
 	"github.com/Allenxuxu/stark/log"
 	"github.com/Allenxuxu/stark/registry"
 	"github.com/google/uuid"
@@ -28,10 +30,6 @@ type Server struct {
 	grpcSever *grpc.Server
 	service   *registry.Service
 	exit      chan struct{}
-
-	options            []grpc.ServerOption
-	streamInterceptors []grpc.StreamServerInterceptor
-	unaryInterceptors  []grpc.UnaryServerInterceptor
 }
 
 func NewServer(rg registry.Registry, opt ...ServerOption) *Server {
@@ -48,6 +46,13 @@ func NewServer(rg registry.Registry, opt ...ServerOption) *Server {
 	for _, o := range opt {
 		o(&opts)
 	}
+
+	opts.GrpcOpts = append(opts.GrpcOpts, grpc.ChainStreamInterceptor(
+		grpc_recovery.StreamServerInterceptor(),
+	))
+	opts.GrpcOpts = append(opts.GrpcOpts, grpc.ChainUnaryInterceptor(
+		grpc_recovery.UnaryServerInterceptor(),
+	))
 
 	g := &Server{
 		opts:     &opts,
