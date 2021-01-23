@@ -1,10 +1,11 @@
-package ratelimit // fork from "go.uber.org/ratelimit"
+package leakybucket // fork from "go.uber.org/ratelimit"
 
 import (
-	"time"
-
 	"sync/atomic"
+	"time"
 	"unsafe"
+
+	"github.com/Allenxuxu/stark/pkg/limit"
 )
 
 type state struct {
@@ -12,43 +13,36 @@ type state struct {
 	sleepFor time.Duration
 }
 
-type Option func(l *atomicLimiter)
-
-// Per allows configuring limits for different time windows.
-//
-// The default window is one second, so New(100) produces a one hundred per
-// second (100 Hz) rate limiter.
-//
-// New(2, Per(60*time.Second)) creates a 2 per minute rate limiter.
-func Per(per time.Duration) Option {
-	return func(l *atomicLimiter) {
-		l.per = per
-	}
-}
-
-type atomicLimiter struct {
+type limiter struct {
 	state unsafe.Pointer
 	//lint:ignore U1000 Padding is unused but it is crucial to maintain performance
 	// of this rate limiter in case of collocation with other frequently accessed memory.
 	padding [56]byte // cache line size - state pointer size = 64 - 8; created to avoid false sharing.
 
-	per        time.Duration
 	perRequest time.Duration
 	maxSlack   time.Duration
+
+	opts limit.Options
 }
 
-// newAtomicBased returns a new atomic based limiter.
-func New(rate int, opts ...Option) *atomicLimiter {
-	l := &atomicLimiter{
-		per:      time.Second,
-		maxSlack: -10 * time.Second / time.Duration(rate),
+func New(rate int, opts ...limit.Option) limit.RateLimit {
+	return newLimit(rate, opts...)
+}
+
+func newLimit(rate int, opts ...limit.Option) *limiter {
+	options := limit.Options{
+		Per: time.Second,
 	}
 
 	for _, o := range opts {
-		o(l)
+		o(&options)
 	}
 
-	l.perRequest = l.per / time.Duration(rate)
+	l := &limiter{
+		maxSlack: -10 * time.Second / time.Duration(rate),
+		opts:     options,
+	}
+	l.perRequest = l.opts.Per / time.Duration(rate)
 
 	initialState := state{
 		last:     time.Time{},
@@ -58,7 +52,7 @@ func New(rate int, opts ...Option) *atomicLimiter {
 	return l
 }
 
-func (t *atomicLimiter) Allow() bool {
+func (t *limiter) Allow() bool {
 	newState := state{}
 	now := time.Now()
 
@@ -83,7 +77,7 @@ func (t *atomicLimiter) Allow() bool {
 
 // Take blocks to ensure that the time spent between multiple
 // Take calls is on average time.Second/rate.
-func (t *atomicLimiter) Take() time.Time {
+func (t *limiter) Take() time.Time {
 	newState := state{}
 	taken := false
 	for !taken {
