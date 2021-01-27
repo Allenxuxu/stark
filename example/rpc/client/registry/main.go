@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Allenxuxu/stark/log"
+
 	"github.com/Allenxuxu/stark"
 	"github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/registry/mdns"
@@ -40,17 +42,17 @@ func main() {
 	}
 	c := routeguide.NewRouteGuideClient(client.Conn())
 
-	for i := 0; i < 10; i++ {
-
+	for i := 0; i < 20; i++ {
 		resp, err := c.GetFeature(context.Background(), &routeguide.Point{
-			Latitude:  0,
+			Latitude:  11,
 			Longitude: 0,
 		})
 		if err != nil {
-			panic(err)
+			log.Error(err)
+			time.Sleep(time.Second)
+			continue
 		}
 
-		fmt.Println(resp.Name, resp.Location.Latitude, resp.Location.Latitude)
-		time.Sleep(time.Second)
+		fmt.Println(i, resp.Name, resp.Location.Latitude, resp.Location.Latitude)
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/Allenxuxu/stark/pkg/limit/tokenbucket"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 
@@ -15,9 +17,9 @@ import (
 
 	"google.golang.org/grpc/reflection"
 
-	"github.com/Allenxuxu/stark/registry/mdns"
-
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
+	"github.com/Allenxuxu/stark/registry/mdns"
+	"github.com/Allenxuxu/stark/rpc/server/middleware/ratelimit"
 )
 
 type routeGuideServer struct{}
@@ -116,6 +118,8 @@ func main() {
 			"test":   "1",
 		}),
 		rpc.UnaryServerInterceptor(interceptor),
+		rpc.UnaryServerInterceptor(ratelimit.UnaryServerInterceptor(tokenbucket.New(10, 5))),
+		rpc.StreamServerInterceptor(ratelimit.StreamServerInterceptor(tokenbucket.New(10, 5))),
 	)
 
 	rs := NewServer()
