@@ -2,6 +2,7 @@ package limit
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -56,5 +57,5 @@ func draw(name string, vs ...interface{}) error {
 		return err
 	}
 
-	return p.Save(4*vg.Inch, 4*vg.Inch, fmt.Sprintf("/Users/xuxu/Downloads/%s.png", name))
+	return p.Save(4*vg.Inch, 4*vg.Inch, fmt.Sprintf("%s/%s.png", os.TempDir(), name))
 }
