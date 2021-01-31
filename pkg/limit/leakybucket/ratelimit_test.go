@@ -22,7 +22,7 @@ func TestLeakyBucketRateLimitTake(t *testing.T) {
 
 }
 
-func testRateLimitTake(t *testing.T, rate int, per time.Duration) {
+func testRateLimitTake(t *testing.T, rate int64, per time.Duration) {
 	rl := newLimit(rate, limit.Per(per))
 	exit := make(chan struct{})
 	var count atomic.Uint64
@@ -65,7 +65,7 @@ func TestLeakyBucketRateLimitAllow(t *testing.T) {
 
 }
 
-func testRateLimitAllow(t *testing.T, rate int, per time.Duration) {
+func testRateLimitAllow(t *testing.T, rate int64, per time.Duration) {
 	rl := newLimit(rate, limit.Per(per))
 	exit := make(chan struct{})
 	var count atomic.Uint64

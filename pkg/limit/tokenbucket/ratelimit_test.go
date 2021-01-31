@@ -26,7 +26,7 @@ func TestTokenBucketTokenLimitAllow(t *testing.T) {
 	rl := newMockLimit(100, 100, mc)
 	assert.Equal(t, rl.cap, int64(100))
 	assert.Equal(t, rl.opts.Per, time.Second)
-	assert.Equal(t, rl.perToken, time.Millisecond*10)
+	assert.Equal(t, time.Duration(rl.perToken.Load()), time.Millisecond*10)
 	assert.Equal(t, int64(100), rl.availableTokens())
 
 	for i := 0; i < 100; i++ {
