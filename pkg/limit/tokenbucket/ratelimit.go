@@ -5,6 +5,8 @@ import (
 	"time"
 	"unsafe"
 
+	uAtomic "go.uber.org/atomic"
+
 	"github.com/Allenxuxu/stark/pkg/limit"
 )
 
@@ -15,7 +17,7 @@ type state struct {
 
 type limiter struct {
 	cap      int64
-	perToken time.Duration
+	perToken *uAtomic.Int64
 	state    unsafe.Pointer
 
 	opts limit.Options
@@ -37,18 +39,23 @@ func newLimit(rate, cap int64, opts ...limit.Option) *limiter {
 	}
 
 	l := &limiter{
-		cap:  cap,
-		opts: options,
-		time: &realClock{},
+		cap:      cap,
+		opts:     options,
+		time:     &realClock{},
+		perToken: uAtomic.NewInt64(0),
 	}
 
-	l.perToken = l.opts.Per / time.Duration(rate)
+	l.perToken.Store(int64(l.opts.Per / time.Duration(rate)))
 
 	s := state{
 		last:            l.time.Now(),
 		availableTokens: cap,
 	}
 	atomic.StorePointer(&l.state, unsafe.Pointer(&s))
+
+	if l.opts.DynamicLimitLoop != nil {
+		go l.opts.DynamicLimitLoop(l.perToken, rate)
+	}
 
 	return l
 }
@@ -64,14 +71,14 @@ func (l *limiter) Take() time.Time {
 		now := l.time.Now()
 
 		newState.last = now
-		newState.availableTokens = min(l.cap, oldState.availableTokens+int64(now.Sub(last)/l.perToken))
+		newState.availableTokens = min(l.cap, oldState.availableTokens+int64(now.Sub(last)/time.Duration(l.perToken.Load())))
 
 		if newState.availableTokens > 0 {
 			newState.availableTokens--
 			taken = atomic.CompareAndSwapPointer(&l.state, previousStatePointer, unsafe.Pointer(&newState))
 		}
 		if !taken {
-			time.Sleep(l.perToken)
+			time.Sleep(time.Duration(l.perToken.Load()))
 		}
 	}
 
@@ -87,7 +94,7 @@ func (l *limiter) Allow() bool {
 
 	newState := state{
 		last:            now,
-		availableTokens: min(l.cap, oldState.availableTokens+int64(now.Sub(last)/l.perToken)),
+		availableTokens: min(l.cap, oldState.availableTokens+int64(now.Sub(last)/time.Duration(l.perToken.Load()))),
 	}
 
 	if newState.availableTokens > 0 {

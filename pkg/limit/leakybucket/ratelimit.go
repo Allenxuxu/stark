@@ -6,6 +6,7 @@ import (
 	"unsafe"
 
 	"github.com/Allenxuxu/stark/pkg/limit"
+	uAtomic "go.uber.org/atomic"
 )
 
 type state struct {
@@ -19,17 +20,17 @@ type limiter struct {
 	// of this rate limiter in case of collocation with other frequently accessed memory.
 	padding [56]byte // cache line size - state pointer size = 64 - 8; created to avoid false sharing.
 
-	perRequest time.Duration
+	perRequest *uAtomic.Int64
 	maxSlack   time.Duration
 
 	opts limit.Options
 }
 
-func New(rate int, opts ...limit.Option) limit.RateLimit {
+func New(rate int64, opts ...limit.Option) limit.RateLimit {
 	return newLimit(rate, opts...)
 }
 
-func newLimit(rate int, opts ...limit.Option) *limiter {
+func newLimit(rate int64, opts ...limit.Option) *limiter {
 	options := limit.Options{
 		Per: time.Second,
 	}
@@ -39,16 +40,21 @@ func newLimit(rate int, opts ...limit.Option) *limiter {
 	}
 
 	l := &limiter{
-		maxSlack: -10 * time.Second / time.Duration(rate),
-		opts:     options,
+		maxSlack:   -10 * time.Second / time.Duration(rate),
+		opts:       options,
+		perRequest: uAtomic.NewInt64(0),
 	}
-	l.perRequest = l.opts.Per / time.Duration(rate)
+	l.perRequest.Store(int64(l.opts.Per / time.Duration(rate)))
 
 	initialState := state{
 		last:     time.Time{},
 		sleepFor: 0,
 	}
 	atomic.StorePointer(&l.state, unsafe.Pointer(&initialState))
+
+	if l.opts.DynamicLimitLoop != nil {
+		go l.opts.DynamicLimitLoop(l.perRequest, rate)
+	}
 	return l
 }
 
@@ -67,7 +73,7 @@ func (t *limiter) Allow() bool {
 		return atomic.CompareAndSwapPointer(&t.state, previousStatePointer, unsafe.Pointer(&newState))
 	}
 
-	if (t.perRequest - now.Sub(oldState.last)) > 0 {
+	if (time.Duration(t.perRequest.Load()) - now.Sub(oldState.last)) > 0 {
 		return false
 	} else {
 		newState.last = now
@@ -99,7 +105,7 @@ func (t *limiter) Take() time.Time {
 		// the perRequest budget and how long the last request took.
 		// Since the request may take longer than the budget, this number
 		// can get negative, and is summed across requests.
-		newState.sleepFor += t.perRequest - now.Sub(oldState.last)
+		newState.sleepFor += time.Duration(t.perRequest.Load()) - now.Sub(oldState.last)
 		// We shouldn't allow sleepFor to get too negative, since it would mean that
 		// a service that slowed down a lot for a short period of time would get
 		// a much higher RPS following that.

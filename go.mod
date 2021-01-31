@@ -31,7 +31,7 @@ require (
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.5.1 // indirect
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	go.etcd.io/bbolt v1.3.5 // indirect
@@ -44,6 +44,7 @@ require (
 	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20200410132612-ae9902aceb98 // indirect
+	gonum.org/v1/plot v0.8.1
 	google.golang.org/genproto v0.0.0-20200729003335-053ba62fc06f // indirect
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.25.0
