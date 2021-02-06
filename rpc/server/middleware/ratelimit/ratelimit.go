@@ -3,13 +3,13 @@ package ratelimit
 import (
 	"context"
 
-	"github.com/Allenxuxu/stark/pkg/limit"
+	"github.com/Allenxuxu/ratelimit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func UnaryServerInterceptor(limiter limit.RateLimit) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor(limiter ratelimit.RateLimit) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if limiter.Allow() {
 			return handler(ctx, req)
@@ -19,7 +19,7 @@ func UnaryServerInterceptor(limiter limit.RateLimit) grpc.UnaryServerInterceptor
 	}
 }
 
-func StreamServerInterceptor(limiter limit.RateLimit) grpc.StreamServerInterceptor {
+func StreamServerInterceptor(limiter ratelimit.RateLimit) grpc.StreamServerInterceptor {
 	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		if limiter.Allow() {
 			return handler(srv, stream)

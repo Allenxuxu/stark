@@ -8,19 +8,15 @@ import (
 	_ "net/http/pprof"
 	"time"
 
-	"github.com/Allenxuxu/stark/pkg/limit/tokenbucket"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/peer"
-
+	"github.com/Allenxuxu/ratelimit/tokenbucket"
 	"github.com/Allenxuxu/stark"
-
-	"github.com/Allenxuxu/stark/rpc"
-
-	"google.golang.org/grpc/reflection"
-
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
 	"github.com/Allenxuxu/stark/registry/mdns"
+	"github.com/Allenxuxu/stark/rpc"
 	"github.com/Allenxuxu/stark/rpc/server/middleware/ratelimit"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/reflection"
 )
 
 type routeGuideServer struct{}

@@ -3,6 +3,7 @@ module github.com/Allenxuxu/stark
 go 1.15
 
 require (
+	github.com/Allenxuxu/ratelimit v0.0.0-20210131080358-1c878c80259b
 	github.com/BurntSushi/toml v0.3.1
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -31,12 +32,11 @@ require (
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.5.1 // indirect
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	go.etcd.io/bbolt v1.3.5 // indirect
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
-	go.uber.org/atomic v1.6.0
 	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
@@ -44,7 +44,6 @@ require (
 	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20200410132612-ae9902aceb98 // indirect
-	gonum.org/v1/plot v0.8.1
 	google.golang.org/genproto v0.0.0-20200729003335-053ba62fc06f // indirect
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.25.0
