@@ -4,10 +4,11 @@ import (
 	"context"
 	"io"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/Allenxuxu/stark/pkg/limit/tokenbucket"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 
@@ -103,6 +104,12 @@ func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInf
 }
 
 func main() {
+	go func() {
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			panic(err)
+		}
+	}()
+
 	//rg, err := consul.NewRegistry()
 	rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
