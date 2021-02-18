@@ -6,6 +6,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	metaDataMetricsAddressKey = "metrics_address"
+)
+
 type ServerOptions struct {
 	Metadata map[string]string
 	Name     string
@@ -13,6 +17,7 @@ type ServerOptions struct {
 	Id       string
 	Version  string
 
+	MetricsPath      string
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 	GrpcOpts         []grpc.ServerOption
@@ -52,6 +57,22 @@ func Address(a string) ServerOption {
 func Metadata(md map[string]string) ServerOption {
 	return func(o *ServerOptions) {
 		o.Metadata = md
+	}
+}
+
+func MetricsAddress(a string) ServerOption {
+	return func(o *ServerOptions) {
+		if o.Metadata == nil {
+			o.Metadata = make(map[string]string)
+		}
+
+		o.Metadata[metaDataMetricsAddressKey] = a
+	}
+}
+
+func MetricsPath(p string) ServerOption {
+	return func(o *ServerOptions) {
+		o.MetricsPath = p
 	}
 }
 

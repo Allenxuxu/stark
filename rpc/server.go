@@ -7,6 +7,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Allenxuxu/stark/rpc/metrics"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 
 	"github.com/Allenxuxu/stark/log"
@@ -71,6 +74,21 @@ func NewServer(rg registry.Registry, opt ...ServerOption) *Server {
 		},
 	}
 
+	// metrics
+	if len(opts.Metadata[metaDataMetricsAddressKey]) > 0 {
+		grpcMetrics := grpc_prometheus.NewServerMetrics()
+		metrics.PrometheusMustRegister(grpcMetrics)
+
+		opts.GrpcOpts = append(opts.GrpcOpts, grpc.ChainStreamInterceptor(
+			grpcMetrics.StreamServerInterceptor(),
+		))
+		opts.GrpcOpts = append(opts.GrpcOpts, grpc.ChainUnaryInterceptor(
+			grpcMetrics.UnaryServerInterceptor(),
+		))
+
+		grpcMetrics.InitializeMetrics(g.grpcSever)
+	}
+
 	return g
 }
 
@@ -115,6 +133,15 @@ func (g *Server) Start() error {
 			log.Errorf("deregister error %v", err)
 		}
 	}()
+
+	// metrics
+	if len(g.opts.Metadata[metaDataMetricsAddressKey]) > 0 {
+		go func() {
+			if err := metrics.Run(g.opts.MetricsPath, g.opts.Metadata[metaDataMetricsAddressKey]); err != nil {
+				log.Fatalf("Run metrics server error: %v", err)
+			}
+		}()
+	}
 
 	log.Infof("RPC server listen on %s", g.opts.Address)
 	return g.grpcSever.Serve(listener)

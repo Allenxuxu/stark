@@ -4,14 +4,12 @@ import (
 	"context"
 	"io"
 	"log"
-	"net/http"
-	_ "net/http/pprof"
 	"time"
 
 	"github.com/Allenxuxu/ratelimit/tokenbucket"
 	"github.com/Allenxuxu/stark"
 	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
-	"github.com/Allenxuxu/stark/registry/mdns"
+	"github.com/Allenxuxu/stark/registry/consul"
 	"github.com/Allenxuxu/stark/rpc"
 	"github.com/Allenxuxu/stark/rpc/server/middleware/ratelimit"
 	"google.golang.org/grpc"
@@ -100,14 +98,8 @@ func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInf
 }
 
 func main() {
-	go func() {
-		if err := http.ListenAndServe(":6060", nil); err != nil {
-			panic(err)
-		}
-	}()
-
-	//rg, err := consul.NewRegistry()
-	rg, err := mdns.NewRegistry()
+	rg, err := consul.NewRegistry()
+	//rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	if err != nil {
 		panic(err)
@@ -120,9 +112,14 @@ func main() {
 			"server": "rpc",
 			"test":   "1",
 		}),
-		rpc.UnaryServerInterceptor(interceptor),
-		rpc.UnaryServerInterceptor(ratelimit.UnaryServerInterceptor(tokenbucket.New(10, 5))),
-		rpc.StreamServerInterceptor(ratelimit.StreamServerInterceptor(tokenbucket.New(10, 5))),
+		rpc.MetricsAddress(":9091"),
+		rpc.UnaryServerInterceptor(
+			interceptor,
+			ratelimit.UnaryServerInterceptor(tokenbucket.New(10, 5)),
+		),
+		rpc.StreamServerInterceptor(
+			ratelimit.StreamServerInterceptor(tokenbucket.New(10, 5)),
+		),
 	)
 
 	rs := NewServer()
