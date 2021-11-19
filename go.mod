@@ -11,7 +11,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.0
 	github.com/go-log/log v0.1.0
 	github.com/go-resty/resty/v2 v2.4.0
 	github.com/gogo/protobuf v1.3.1 // indirect
