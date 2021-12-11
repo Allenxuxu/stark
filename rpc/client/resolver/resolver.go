@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-// "stark_registry:///{service}"
+// "stark-registry:///{service}"
 type builder struct {
 	scheme   string
 	selector *atomic.Value

@@ -1,6 +1,8 @@
 package registry
 
 import (
+	"fmt"
+	"net/url"
 	"testing"
 
 	"github.com/Allenxuxu/stark/rpc/client/selector"
@@ -81,4 +83,12 @@ func TestRegistrySelectorFilter(t *testing.T) {
 	assert.Equal(t, 1, len(service))
 	assert.Equal(t, service[0].Name, "foo")
 	assert.Equal(t, service[0].Version, version)
+}
+
+func Test_schema(t *testing.T) {
+	_, err := url.Parse(fmt.Sprintf("%s:///%s", "stark_registry", "test"))
+	assert.Error(t, err)
+
+	_, err = url.Parse(fmt.Sprintf("%s:///%s", "stark-registry", "test"))
+	assert.NoError(t, err)
 }

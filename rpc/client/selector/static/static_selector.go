@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-const scheme = "stark_static"
+const scheme = "stark-static"
 
 var _selector atomic.Value
 
